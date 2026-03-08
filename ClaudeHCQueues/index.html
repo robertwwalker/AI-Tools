@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Queueing Laboratory: Operations Management & Capacity Planning</title>
+    <title>Chaos Lab: Operations Science & Capacity Optimization</title>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -369,7 +369,7 @@
 
 <nav>
     <div class="container">
-        <a href="index.html" class="logo">Queue Lab</a>
+        <a href="index.html" class="logo">Chaos Lab</a>
         <div class="nav-links">
             <a href="index.html" class="active">Home</a>
             <a href="mmc.html">M/M/c Standard</a>
@@ -381,26 +381,24 @@
 </nav>
 
 <header class="hero">
-    <h1>The <span class="highlight">Queueing Laboratory</span></h1>
-    <p>Capacity Planning & Operations Optimization Under Stochastic Demand</p>
-    <p class="subtitle">Interactive Tools for Queueing Theory, Capacity Analysis & Managing Variable Arrivals</p>
+    <h1>The <span class="highlight">Calculus of Chaos</span></h1>
+    <p>Advanced Capacity Optimization & Stochastic Simulation for High-Stakes Healthcare Systems</p>
+    <p class="subtitle">Interactive Laboratory for Queueing Theory, Operations Research & Surge Capacity Planning</p>
 </header>
 
 <div class="container">
     <section class="intro-section">
-        <h2>Welcome to the Queueing Laboratory</h2>
+        <h2>Welcome to the Operations Science Laboratory</h2>
         
-        <p>This interactive laboratory provides hands-on exploration of <strong>queueing theory</strong> and <em>capacity planning under uncertainty</em> through browser-based stochastic simulation. All computation runs entirely in your browser using Python (via Pyodide) with no server dependencies.</p>
+        <p>This interactive laboratory provides hands-on exploration of <strong>queueing theory</strong> and <em>capacity optimization</em> through browser-based stochastic simulation. All computation runs entirely in your browser using Python (via Pyodide) with no server dependencies.</p>
         
-        <p>Operational systems across all industries face a fundamental challenge: <strong>demand arrives randomly following a Poisson process</strong>, creating variability that simple average-based planning cannot address. Whether it's patients arriving at an emergency department, customers calling a service center, orders entering a manufacturing system, or requests hitting a web server—the core problem is identical: <em>how much capacity is needed when arrivals are uncertain?</em></p>
+        <p>Healthcare systems face a fundamental challenge: <strong>arrivals follow a Poisson process</strong>, exhibiting natural "clumping" that creates queues even when average capacity exceeds average demand. Traditional planning methods that rely on simple averages fail catastrophically in these environments, especially during surge events.</p>
         
-        <p>Traditional capacity planning methods that assume constant, predictable demand systematically fail in stochastic environments. A system with 80% average utilization (seemingly comfortable) can experience severe congestion simply due to natural arrival clustering. Through <em>ensemble simulation</em> (60+ parallel realities), we capture the full spectrum of operational volatility and identify optimal capacity configurations that account for this inherent variability.</p>
+        <p>Through <em>ensemble simulation</em> (60+ parallel realities), we capture the full spectrum of operational volatility and identify optimal capacity configurations. Our <strong>time-path visualizations</strong> reveal system dynamics during normal operations and shock scenarios, showing exactly how long it takes systems to recover from surge events.</p>
         
-        <p>Our <strong>time-path visualizations</strong> reveal system dynamics during normal operations and surge scenarios, showing exactly how long it takes systems to recover from demand spikes—critical for capacity planning in healthcare, manufacturing, retail, telecommunications, and service operations. This enables evidence-based answers to fundamental operations questions: How many servers? How much buffer capacity? What service level can we promise?</p>
+        <p><strong>New: Shock Scenario Analysis</strong> — Each model now supports testing four surge magnitudes (baseline, 2×, 3×, 5× arrivals) with visual recovery analysis. This enables evidence-based surge capacity planning and preparedness assessment.</p>
         
-        <p><strong>Surge Scenario Analysis</strong> — Each model supports testing multiple demand magnitudes (baseline, 2×, 3×, 5× arrivals) with visual recovery analysis. Test resilience across industries: emergency departments preparing for mass casualty events, call centers handling product launches, manufacturing facilities managing seasonal demand spikes, or retail operations navigating holiday rushes.</p>
-        
-        <p><strong>Each model below addresses a fundamental queueing scenario with examples spanning multiple industries:</strong></p>
+        <p><strong>Each model below addresses a specific operational scenario with interactive simulations and dynamic visualizations:</strong></p>
     </section>
 
     <div class="models-grid">
@@ -413,17 +411,16 @@
             <p>The foundational multi-server queue with Poisson arrivals and exponential service times. Assumes unlimited waiting capacity—the theoretical baseline for all queueing analysis.</p>
             
             <div class="use-cases">
-                <strong>🏭 Industry Applications:</strong>
+                <strong>🏥 Clinical Applications:</strong>
                 <ul>
-                    <li><strong>Healthcare:</strong> Emergency department physician staffing, operating room scheduling</li>
-                    <li><strong>Manufacturing:</strong> Assembly line workstations, quality inspection stations</li>
-                    <li><strong>Retail:</strong> Checkout lanes, customer service desks</li>
-                    <li><strong>Call Centers:</strong> Agent staffing for inbound customer service</li>
-                    <li><strong>Transportation:</strong> TSA security screening, toll booth lanes</li>
+                    <li>Emergency department physician staffing</li>
+                    <li>Operating room scheduling optimization</li>
+                    <li>Outpatient clinic capacity planning</li>
+                    <li>Radiology service configuration</li>
                 </ul>
             </div>
             
-            <p><strong>Key Insight:</strong> Utilization (ρ) must stay below 100% for stability. At 90% utilization, wait times become highly volatile across all industries. The "elbow" typically occurs around 75-80% utilization—whether you're staffing nurses or configuring servers.</p>
+            <p><strong>Key Insight:</strong> Utilization (ρ) must stay below 100% for stability. At 90% utilization, wait times become highly volatile. The "elbow" typically occurs around 75-80% utilization.</p>
             
             <a href="mmc.html" class="btn">Explore M/M/c Model →</a>
         </div>
@@ -434,20 +431,19 @@
             <h3>Finite Capacity (M/M/c/K)</h3>
             <span class="model-label">BLOCKING PROBABILITY MODEL</span>
             
-            <p>Extends M/M/c with a maximum system capacity K. When K entities are in the system (served + waiting), new arrivals are rejected or diverted. Critical for resource-constrained environments across all industries.</p>
+            <p>Extends M/M/c with a maximum system capacity K. When K patients are in the system (served + waiting), new arrivals are rejected or diverted. Critical for resource-constrained environments.</p>
             
             <div class="use-cases">
-                <strong>🏭 Industry Applications:</strong>
+                <strong>🏥 Clinical Applications:</strong>
                 <ul>
-                    <li><strong>Healthcare:</strong> ICU bed management, inpatient capacity with fixed bed counts</li>
-                    <li><strong>Manufacturing:</strong> Buffer storage limits, work-in-process constraints</li>
-                    <li><strong>Retail:</strong> Parking lot capacity, restaurant seating limits</li>
-                    <li><strong>Cloud Computing:</strong> Connection pools, server capacity limits</li>
-                    <li><strong>Telecommunications:</strong> Circuit-switched networks, trunk line capacity</li>
+                    <li>Inpatient bed management (fixed bed count)</li>
+                    <li>ICU capacity with hard limits</li>
+                    <li>Ambulance diversion protocols</li>
+                    <li>Boarding and overflow management</li>
                 </ul>
             </div>
             
-            <p><strong>Key Insight:</strong> Blocking probability (P<sub>B</sub>) rises exponentially near capacity. Operating at >90% of K creates cascading failures—whether it's hospital ambulance diversions overwhelming neighboring facilities or network congestion triggering packet loss across infrastructure.</p>
+            <p><strong>Key Insight:</strong> Blocking probability (P<sub>B</sub>) rises exponentially near capacity. Operating at >90% of K creates cascading regional failures as diverted patients overwhelm neighboring facilities.</p>
             
             <a href="circular.html" class="btn">Explore M/M/c/K Model →</a>
         </div>
@@ -455,23 +451,22 @@
         <!-- Priority -->
         <div class="model-card">
             <div class="icon">⚡</div>
-            <h3>Priority Queue (Non-Preemptive)</h3>
-            <span class="model-label">PRIORITY CLASSIFICATION MODEL</span>
+            <h3>Priority Queue (Triage)</h3>
+            <span class="model-label">NON-PREEMPTIVE PRIORITY MODEL</span>
             
-            <p>Implements priority logic where high-priority entities receive preferential service. Does not interrupt service-in-progress (non-preemptive). Redistributes variance—reduces wait for critical tasks, increases wait for routine tasks.</p>
+            <p>Implements triage logic where high-priority patients receive preferential service. Does not interrupt service-in-progress (non-preemptive). Redistributes variance—reduces wait for critical, increases wait for stable.</p>
             
             <div class="use-cases">
-                <strong>🏭 Industry Applications:</strong>
+                <strong>🏥 Clinical Applications:</strong>
                 <ul>
-                    <li><strong>Healthcare:</strong> Emergency triage (ESI), trauma activation protocols</li>
-                    <li><strong>IT Operations:</strong> Help desk tickets (P1/P2/P3), incident management</li>
-                    <li><strong>Airlines:</strong> Priority boarding, baggage handling for premium passengers</li>
-                    <li><strong>Manufacturing:</strong> Rush orders vs. regular production scheduling</li>
-                    <li><strong>Call Centers:</strong> VIP customer routing, escalated complaint handling</li>
+                    <li>Emergency severity index (ESI) triage</li>
+                    <li>Trauma activation protocols</li>
+                    <li>STEMI/stroke fast-track pathways</li>
+                    <li>Urgent vs. routine surgical scheduling</li>
                 </ul>
             </div>
             
-            <p><strong>Key Insight:</strong> Priority systems don't create capacity—they shift variance. Low-priority wait times can explode to 10-20× high-priority waits at high utilization. Whether it's IT tickets, airline boarding, or emergency triage, this requires careful equity and fairness considerations.</p>
+            <p><strong>Key Insight:</strong> Priority systems don't create capacity—they shift variance. Low-priority wait times can explode to 10-20× high-priority waits at high utilization. Requires careful equity considerations.</p>
             
             <a href="priority.html" class="btn">Explore Priority Model →</a>
         </div>
@@ -482,20 +477,19 @@
             <h3>Reneging/Abandonment</h3>
             <span class="model-label">PATIENCE-LIMITED MODEL</span>
             
-            <p>Models customer abandonment when wait times exceed individual patience thresholds. Entities leave without service (balking), creating revenue loss and poor outcomes. Self-regulating but costly across all service industries.</p>
+            <p>Models customer abandonment when wait times exceed individual patience thresholds. Patients leave without service (LWBS), creating revenue loss and poor outcomes. Self-regulating but costly.</p>
             
             <div class="use-cases">
-                <strong>🏭 Industry Applications:</strong>
+                <strong>🏥 Clinical Applications:</strong>
                 <ul>
-                    <li><strong>Healthcare:</strong> LWBS (Left Without Being Seen) in emergency departments</li>
-                    <li><strong>Call Centers:</strong> Caller abandonment, average speed of answer (ASA) targets</li>
-                    <li><strong>E-commerce:</strong> Shopping cart abandonment, checkout dropout rates</li>
-                    <li><strong>Restaurants:</strong> Customer walk-outs from excessive wait times</li>
-                    <li><strong>Online Services:</strong> User session timeouts, page load abandonment</li>
+                    <li>Left without being seen (LWBS) rates</li>
+                    <li>Walk-in clinic patient retention</li>
+                    <li>Call center abandonment optimization</li>
+                    <li>Online check-in dropout prevention</li>
                 </ul>
             </div>
             
-            <p><strong>Key Insight:</strong> Abandonment creates a natural upper bound on queue length but at the cost of lost revenue and customer dissatisfaction. A 5% LWBS rate in healthcare, 10% call abandonment, or 20% cart abandonment each represents massive revenue leakage—often millions annually for mid-sized operations.</p>
+            <p><strong>Key Insight:</strong> Abandonment creates a "pressure relief valve" that prevents infinite queues, but represents system failure. Each LWBS patient is lost revenue, poor outcomes, and potential litigation risk.</p>
             
             <a href="reneging.html" class="btn">Explore Reneging Model →</a>
         </div>
@@ -503,10 +497,10 @@
 </div>
 
 <footer>
-    <p><strong>The Queueing Laboratory</strong> • Operations Management & Capacity Planning Under Uncertainty</p>
-    <p>Interactive queueing theory simulations with demand variability analysis, time-path visualizations, and recovery dynamics</p>
+    <p><strong>Chaos Lab: The Calculus of Chaos</strong> • Operations Science & Capacity Optimization</p>
+    <p>Interactive queueing theory simulations with surge scenario analysis, time-path visualizations, and recovery dynamics</p>
     <p>Built with Pyodide, NumPy, Matplotlib • All computation runs client-side in your browser • No data transmission or server dependencies</p>
-    <p>Educational tool for operations management, industrial engineering, queueing theory, and evidence-based capacity planning across healthcare, manufacturing, retail, telecommunications, and service operations</p>
+    <p>Educational tool for healthcare operations research, stochastic simulation, and evidence-based capacity planning</p>
 </footer>
 
 </body>

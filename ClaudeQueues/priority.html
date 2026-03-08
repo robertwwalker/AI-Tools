@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Priority Queue | Chaos Lab</title>
+    <title>Priority Queue | Queue Lab</title>
     <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,7 +15,7 @@
 
 <nav>
     <div class="container">
-        <a href="index.html" class="logo">Chaos Lab</a>
+        <a href="index.html" class="logo">Queue Lab</a>
         <div class="nav-links">
             <a href="index.html">Home</a>
             <a href="mmc.html">M/M/c Standard</a>
@@ -96,10 +96,10 @@
     </section>
 
     <section class="example-section">
-        <h2>Real-World Example: Emergency Department Triage</h2>
+        <h2>Real-World Applications Across Industries</h2>
         
         <div class="example-card">
-            <h3>Scenario: ESI-Based Triage System</h3>
+            <h3>Healthcare: Emergency Department Triage (ESI System)</h3>
             
             <p><strong>Operational Context:</strong></p>
             <ul>
@@ -110,16 +110,40 @@
                 <li>Physicians on duty: <strong>5</strong></li>
                 <li>Policy: ESI 1-2 always seen before ESI 3-5</li>
             </ul>
+            <p><strong>Analysis:</strong> Total ρ = 15/(5×3) = 1.0. ESI 1-2 patients see minimal wait, while ESI 3-5 patients experience extreme delays (variance redistribution).</p>
+        </div>
+        
+        <div class="example-card">
+            <h3>IT Operations: Help Desk Ticket Management</h3>
             
-            <p><strong>Analysis:</strong></p>
-            <p>Total utilization: ρ = 15/(5×3) = 1.0 → At stability threshold</p>
-            <p>High-priority utilization: ρ₁ = 4.5/(5×3) = 0.30</p>
-            <p>Low-priority utilization: ρ₂ = 10.5/(5×3) = 0.70</p>
+            <p><strong>Operational Context:</strong></p>
+            <ul>
+                <li>Total ticket rate: <strong>60 tickets/hour</strong></li>
+                <li>P1 (Critical): <strong>10% of tickets</strong> → 6/hour</li>
+                <li>P2-P3 (Normal): <strong>90% of tickets</strong> → 54/hour</li>
+                <li>Average resolution time: <strong>15 minutes</strong> (μ = 4/hour)</li>
+                <li>Support staff: <strong>18 technicians</strong></li>
+                <li>SLA: P1 within 30 min, P2-P3 within 4 hours</li>
+            </ul>
+            <p><strong>Analysis:</strong> Total ρ = 60/(18×4) = 0.83. P1 tickets meet SLA easily, but P2-P3 tickets can wait 3-5× longer during peak periods.</p>
+        </div>
+        
+        <div class="example-card">
+            <h3>Manufacturing: Rush Order vs. Regular Production</h3>
             
-            <p><strong>Predicted Outcome:</strong> ESI 1-2 patients see minimal wait, while ESI 3-5 patients experience extreme delays. At 80% total utilization, low-priority wait might be 5-10× higher than high-priority.</p>
+            <p><strong>Operational Context:</strong></p>
+            <ul>
+                <li>Total order rate: <strong>24 orders/day</strong> (1/hour)</li>
+                <li>Rush orders: <strong>25% of orders</strong> → 0.25/hour</li>
+                <li>Regular orders: <strong>75% of orders</strong> → 0.75/hour</li>
+                <li>Average production time: <strong>6 hours/order</strong> (μ = 1/6/hour)</li>
+                <li>Production lines: <strong>8 lines</strong></li>
+                <li>Policy: Rush orders preempt regular production scheduling</li>
+            </ul>
+            <p><strong>Analysis:</strong> Total ρ = 1/(8×0.167) = 0.75. Rush orders complete in ~7 hours, regular orders may wait 15-20 hours during high utilization.</p>
             
             <div class="hint-box">
-                💡 <strong>Try this:</strong> Input λ=15, μ=3, c=5, Priority %=30. Compare wait times to standard M/M/c with same parameters. Notice how variance shifts.
+                💡 <strong>Try this:</strong> Test these scenarios below to see variance redistribution across industries. Notice how priority systems shift wait time from critical to routine tasks without creating new capacity.
             </div>
         </div>
     </section>
@@ -242,8 +266,8 @@
 </div>
 
 <footer>
-    <p><strong>Chaos Lab</strong> • Priority Queue Model</p>
-    <p>All computation runs in your browser using Pyodide</p>
+    <p><strong>The Queueing Laboratory</strong> • Priority Queue Model</p>
+    <p>Capacity planning under stochastic demand • All computation runs in your browser using Pyodide</p>
 </footer>
 
 <script>

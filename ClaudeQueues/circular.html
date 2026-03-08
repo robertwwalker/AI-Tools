@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finite Capacity Queue | Chaos Lab</title>
+    <title>Finite Capacity Queue | Queue Lab</title>
     <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,7 +15,7 @@
 
 <nav>
     <div class="container">
-        <a href="index.html" class="logo">Chaos Lab</a>
+        <a href="index.html" class="logo">Queue Lab</a>
         <div class="nav-links">
             <a href="index.html">Home</a>
             <a href="mmc.html">M/M/c Standard</a>
@@ -92,10 +92,10 @@
     </section>
 
     <section class="example-section">
-        <h2>Real-World Example: ICU Bed Management</h2>
+        <h2>Real-World Applications Across Industries</h2>
         
         <div class="example-card">
-            <h3>Scenario: Regional Trauma Center ICU</h3>
+            <h3>Healthcare: ICU Bed Management</h3>
             
             <p><strong>Operational Context:</strong></p>
             <ul>
@@ -105,14 +105,38 @@
                 <li>Beds (servers): Each bed is a "server" → <strong>c = 20</strong></li>
                 <li>Policy goal: < 5% diversion rate</li>
             </ul>
+            <p><strong>Analysis:</strong> High-utilization system where K = c. Any arrival when all beds are full triggers ambulance diversion.</p>
+        </div>
+        
+        <div class="example-card">
+            <h3>Manufacturing: Buffer Storage Between Work Centers</h3>
             
-            <p><strong>Analysis:</strong></p>
-            <p>This is a high-utilization system where K = c (capacity equals servers). Any patient arrival when all beds are full triggers ambulance diversion.</p>
+            <p><strong>Operational Context:</strong></p>
+            <ul>
+                <li>Buffer capacity: <strong>50 units (K = 50)</strong></li>
+                <li>Parts arriving from upstream: <strong>120 units/hour</strong> (λ = 120)</li>
+                <li>Downstream processing rate: <strong>5 units/hour/station</strong> (μ = 5)</li>
+                <li>Processing stations: <strong>30 stations</strong> (c = 30)</li>
+                <li>Target: < 2% blocking (parts rejected/scrapped)</li>
+            </ul>
+            <p><strong>Analysis:</strong> Utilization ρ = 120/(30×5) = 0.80. Buffer prevents upstream blockage, but finite K creates blocking when buffer fills.</p>
+        </div>
+        
+        <div class="example-card">
+            <h3>Cloud Computing: Connection Pool Management</h3>
             
-            <p><strong>Critical Question:</strong> What blocking rate should we expect, and would expanding to K=22 or K=25 significantly reduce diversions?</p>
+            <p><strong>Operational Context:</strong></p>
+            <ul>
+                <li>Maximum connections: <strong>1000 (K = 1000)</strong></li>
+                <li>Request rate: <strong>800 requests/second</strong> (λ = 800)</li>
+                <li>Average request duration: <strong>2 seconds</strong> (μ = 0.5 requests/sec/connection)</li>
+                <li>Connection pool size: <strong>1000</strong> (c = 1000, K = c)</li>
+                <li>Target: < 0.1% request rejection rate</li>
+            </ul>
+            <p><strong>Analysis:</strong> Operating at ρ = 800/(1000×0.5) = 1.6 → normally unstable, but K limit creates self-regulation through blocking.</p>
             
             <div class="hint-box">
-                💡 <strong>Try this:</strong> Input λ=0.33, μ=0.0139, c=20, K=20. Then test K=22, K=25 to see blocking reduction. Enable shock to simulate mass casualty event.
+                💡 <strong>Try this:</strong> Test these scenarios below. Enable shock simulation to model surge events: mass casualty (healthcare), machine breakdown (manufacturing), or traffic spike (cloud services).
             </div>
         </div>
     </section>
@@ -233,8 +257,8 @@
 </div>
 
 <footer>
-    <p><strong>Chaos Lab</strong> • M/M/c/K Finite Capacity Model</p>
-    <p>All computation runs in your browser using Pyodide</p>
+    <p><strong>The Queueing Laboratory</strong> • M/M/c/K Finite Capacity Model</p>
+    <p>Capacity planning under stochastic demand • All computation runs in your browser using Pyodide</p>
 </footer>
 
 <script>

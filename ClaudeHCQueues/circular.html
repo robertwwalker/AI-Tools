@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>M/M/c Standard Queue | The Queueing Laboratory</title>
+    <title>Finite Capacity Queue | Chaos Lab</title>
     <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,11 +15,11 @@
 
 <nav>
     <div class="container">
-        <a href="index.html" class="logo">Queue Lab</a>
+        <a href="index.html" class="logo">Chaos Lab</a>
         <div class="nav-links">
             <a href="index.html">Home</a>
-            <a href="mmc.html" class="active">M/M/c Standard</a>
-            <a href="circular.html">Finite Capacity</a>
+            <a href="mmc.html">M/M/c Standard</a>
+            <a href="circular.html" class="active">Finite Capacity</a>
             <a href="priority.html">Priority Queue</a>
             <a href="reneging.html">Reneging</a>
         </div>
@@ -28,8 +28,8 @@
 
 <div class="container">
     <div class="page-header">
-        <h1>M/M/c Standard Queue</h1>
-        <p class="subtitle">Multi-Server Queueing with Surge Analysis & Recovery Dynamics</p>
+        <h1>M/M/c/K Finite Capacity Queue</h1>
+        <p class="subtitle">Blocking Dynamics, Capacity Limits & Surge Impact Analysis</p>
     </div>
 
     <aside class="variable-sidebar">
@@ -44,122 +44,100 @@
         </div>
         <div class="var-item">
             <strong>c</strong>
-            <p>Number of servers (doctors, nurses, etc.)</p>
+            <p>Number of servers (beds, staff, etc.)</p>
+        </div>
+        <div class="var-item">
+            <strong>K</strong>
+            <p>Maximum system capacity (servers + queue)</p>
+            <p class="var-note">K ≥ c always</p>
+        </div>
+        <div class="var-item">
+            <strong>P<sub>B</sub></strong>
+            <p>Blocking probability (arrivals rejected when full)</p>
         </div>
         <div class="var-item">
             <strong>ρ (rho)</strong>
             <p>Utilization = λ/(c×μ)</p>
-            <p class="var-note">Must be < 1 for stability</p>
-        </div>
-        <div class="var-item">
-            <strong>W<sub>q</sub></strong>
-            <p>Average wait time in queue</p>
-        </div>
-        <div class="var-item">
-            <strong>L<sub>q</sub></strong>
-            <p>Average queue length</p>
+            <p class="var-note">Can be ≥ 1 (blocking prevents unbounded growth)</p>
         </div>
     </aside>
 
     <section class="theory-section">
         <h2>Mathematical Foundation</h2>
         
-        <p>The M/M/c queue represents the canonical multi-server system with <strong>Markovian (memoryless) arrivals</strong> and <strong>Markovian service times</strong>, serving c parallel servers. This model assumes unlimited waiting capacity—patients can queue indefinitely.</p>
+        <p>The M/M/c/K model extends the standard M/M/c queue by imposing a <strong>hard capacity limit K</strong> on the total number of customers in the system (being served + waiting). When K patients are present, new arrivals are <em>blocked</em> and diverted elsewhere.</p>
         
-        <h3>The Stability Criterion</h3>
-        <p>System stability requires that total service capacity exceeds arrival rate:</p>
+        <h3>Blocking Probability</h3>
+        <p>The critical performance metric is <strong>P<sub>B</sub></strong>, the probability that an arriving customer finds the system full:</p>
         
         <div class="math-box">
-            $$\rho = \frac{\lambda}{c\mu} < 1$$
+            $$P_B = P_K = P_0 \frac{(c\rho)^K}{c! \cdot c^{K-c}}$$
         </div>
         
-        <p>Where <strong>ρ</strong> is the system utilization factor. When ρ ≥ 1, the queue grows without bound.</p>
-        
-        <h3>The Erlang C Formula</h3>
-        <p>The probability that an arriving customer must wait (all servers busy) is given by Erlang's C formula:</p>
+        <p>Where P₀ is modified for the finite system:</p>
         
         <div class="math-box">
-            $$C(c, \lambda/\mu) = \frac{\frac{(c\rho)^c}{c!(1-\rho)}}{P_0^{-1}}$$
+            $$P_0 = \left[\sum_{n=0}^{c-1} \frac{(c\rho)^n}{n!} + \frac{(c\rho)^c}{c!}\sum_{n=c}^{K}\left(\frac{\rho}{1}\right)^{n-c}\right]^{-1}$$
         </div>
         
-        <p>Where P₀ is the probability all servers are idle:</p>
+        <h3>Key Difference from M/M/c</h3>
+        <p>Unlike the infinite-capacity model, M/M/c/K can be stable even when ρ ≥ 1 because the finite buffer prevents unbounded growth. However, this stability comes at the cost of high blocking rates.</p>
+        
+        <h3>Effective Arrival Rate</h3>
+        <p>Due to blocking, the effective throughput is reduced:</p>
         
         <div class="math-box">
-            $$P_0 = \left[\sum_{n=0}^{c-1} \frac{(c\rho)^n}{n!} + \frac{(c\rho)^c}{c!(1-\rho)}\right]^{-1}$$
-        </div>
-        
-        <h3>Average Wait Time</h3>
-        <p>For those who must wait, the average queue time is:</p>
-        
-        <div class="math-box">
-            $$W_q = \frac{C(c, \lambda/\mu)}{c\mu - \lambda}$$
+            $$\lambda_{eff} = \lambda(1 - P_B)$$
         </div>
     </section>
 
     <section class="example-section">
-        <h2>Real-World Applications Across Industries</h2>
+        <h2>Real-World Example: ICU Bed Management</h2>
         
         <div class="example-card">
-            <h3>Healthcare: Emergency Department Physician Staffing</h3>
+            <h3>Scenario: Regional Trauma Center ICU</h3>
             
             <p><strong>Operational Context:</strong></p>
             <ul>
-                <li>Average arrival rate: <strong>12 patients/hour</strong> (λ = 12)</li>
-                <li>Average service time per physician: <strong>15 minutes</strong> (μ = 4 patients/hour/physician)</li>
-                <li>Current staffing: <strong>3 physicians</strong> (c = 3)</li>
-                <li>Target: Wait time < 20 minutes for 90% of patients</li>
+                <li>ICU bed capacity: <strong>20 beds (K = 20)</strong></li>
+                <li>Average arrival rate: <strong>8 patients/day</strong> (λ = 8/24 ≈ 0.33/hr)</li>
+                <li>Average ICU length of stay: <strong>72 hours</strong> (μ = 1/72 ≈ 0.0139/hr)</li>
+                <li>Beds (servers): Each bed is a "server" → <strong>c = 20</strong></li>
+                <li>Policy goal: < 5% diversion rate</li>
             </ul>
-            <p><strong>Analysis:</strong> Utilization ρ = 12/(3×4) = 1.0 → <span class="warning">UNSTABLE!</span> The system is at critical threshold. Small fluctuations create unbounded queues.</p>
-        </div>
-        
-        <div class="example-card">
-            <h3>Manufacturing: Quality Inspection Stations</h3>
             
-            <p><strong>Operational Context:</strong></p>
-            <ul>
-                <li>Parts arriving: <strong>180 units/hour</strong> (λ = 180)</li>
-                <li>Inspection time: <strong>2 minutes/part</strong> (μ = 30 units/hour/inspector)</li>
-                <li>Current staffing: <strong>7 inspectors</strong> (c = 7)</li>
-                <li>Target: Minimize work-in-process inventory (waiting parts)</li>
-            </ul>
-            <p><strong>Analysis:</strong> Utilization ρ = 180/(7×30) = 0.86. Operating near the "elbow"—adding 1 inspector dramatically reduces queue length.</p>
-        </div>
-        
-        <div class="example-card">
-            <h3>Call Center: Customer Service Representatives</h3>
+            <p><strong>Analysis:</strong></p>
+            <p>This is a high-utilization system where K = c (capacity equals servers). Any patient arrival when all beds are full triggers ambulance diversion.</p>
             
-            <p><strong>Operational Context:</strong></p>
-            <ul>
-                <li>Incoming calls: <strong>240 calls/hour</strong> (λ = 240)</li>
-                <li>Average handle time: <strong>5 minutes</strong> (μ = 12 calls/hour/agent)</li>
-                <li>Current staffing: <strong>25 agents</strong> (c = 25)</li>
-                <li>Target: Average speed of answer (ASA) < 30 seconds</li>
-            </ul>
-            <p><strong>Analysis:</strong> Utilization ρ = 240/(25×12) = 0.80. Adequate for steady-state but vulnerable to surge events (product launches, outages).</p>
+            <p><strong>Critical Question:</strong> What blocking rate should we expect, and would expanding to K=22 or K=25 significantly reduce diversions?</p>
             
             <div class="hint-box">
-                💡 <strong>Try this:</strong> Test these scenarios in the simulator below. Enable shock simulation to test surge resilience across industries—whether it's a mass casualty event (healthcare), machine breakdown (manufacturing), or service outage (call center).
+                💡 <strong>Try this:</strong> Input λ=0.33, μ=0.0139, c=20, K=20. Then test K=22, K=25 to see blocking reduction. Enable shock to simulate mass casualty event.
             </div>
         </div>
     </section>
 
     <section class="lab-section">
         <h2>Interactive Simulation Laboratory</h2>
-        <p>Run ensemble simulations (60 parallel realities) to analyze queue behavior under various conditions. Test multiple shock scenarios (2×, 3×, 5× surge arrivals) and visualize system dynamics including queue evolution and recovery time.</p>
+        <p>Simulate finite-capacity systems with blocking dynamics. Test surge scenarios to observe blocking cascades, system saturation, and recovery patterns. Visualizations include occupancy tracking and blocking event analysis over time.</p>
         
         <div class="lab-ui">
             <div class="control-grid">
                 <div class="control-group">
                     <label>Arrivals (λ/hr)</label>
-                    <input type="number" id="lam" value="12" step="0.5" min="0">
+                    <input type="number" id="lam" value="0.33" step="0.05" min="0">
                 </div>
                 <div class="control-group">
-                    <label>Service (μ/hr/Server)</label>
-                    <input type="number" id="mu" value="4" step="0.25" min="0.1">
+                    <label>Service (μ/hr/Bed)</label>
+                    <input type="number" id="mu" value="0.0139" step="0.001" min="0.001">
                 </div>
                 <div class="control-group">
-                    <label>Current Servers (c)</label>
-                    <input type="number" id="servers" value="4" step="1" min="1">
+                    <label>Servers/Beds (c)</label>
+                    <input type="number" id="servers" value="20" step="1" min="1">
+                </div>
+                <div class="control-group">
+                    <label>Max Capacity (K)</label>
+                    <input type="number" id="capacity" value="20" step="1" min="1">
                 </div>
             </div>
 
@@ -168,11 +146,11 @@
                 <div class="control-grid" style="margin-top:15px;">
                     <div class="control-group">
                         <label>Target Max Wait (min)</label>
-                        <input type="number" id="target_wait" value="20" step="5" min="5">
+                        <input type="number" id="target_wait" value="30" step="5" min="5">
                     </div>
                     <div class="control-group">
-                        <label>Acceptable Loss (%)</label>
-                        <input type="number" id="target_loss" value="0" step="1" min="0" max="100">
+                        <label>Max Blocking Rate (%)</label>
+                        <input type="number" id="target_loss" value="5" step="1" min="0" max="100">
                     </div>
                 </div>
             </div>
@@ -191,6 +169,9 @@
                     </label>
                     <label class="shock-radio">
                         <input type="radio" name="shock" value="3x">
+                        <span>3× Surge (High)</span>
+                    </label>
+                    <label class="shock-radio">
                         <input type="radio" name="shock" value="5x">
                         <span>5× Surge (Extreme)</span>
                     </label>
@@ -214,7 +195,7 @@
                 
                 <div class="time-path-section">
                     <h3>System Dynamics & Recovery Analysis</h3>
-                    <p>This visualization shows how the system evolves over 24 hours, including queue buildup during shock and recovery time afterward.</p>
+                    <p>Visualizes queue buildup, blocking events, and system recovery over 24 hours.</p>
                     <div class="img-wrap">
                         <img id="time-plot-img" src="" alt="Time Path Analysis" />
                     </div>
@@ -226,39 +207,39 @@
     <section class="interpretation-section">
         <h2>Interpreting Your Results</h2>
         
-        <h3>Key Metrics Explained</h3>
+        <h3>Blocking vs. Waiting</h3>
         
         <div class="metric-card">
-            <h4>Utilization (ρ)</h4>
-            <p><strong>< 70%:</strong> <span class="good">Low stress, highly responsive</span></p>
-            <p><strong>70-85%:</strong> <span class="ok">Efficient, manageable volatility</span></p>
-            <p><strong>85-95%:</strong> <span class="warning">High volatility, vulnerable to shocks</span></p>
-            <p><strong>≥ 95%:</strong> <span class="danger">Extreme wait times, system fragility</span></p>
+            <h4>Loss Rate (Blocking Probability)</h4>
+            <p><strong>< 2%:</strong> <span class="good">Excellent—rare diversions</span></p>
+            <p><strong>2-5%:</strong> <span class="ok">Acceptable for non-emergency</span></p>
+            <p><strong>5-10%:</strong> <span class="warning">High—impacts regional system</span></p>
+            <p><strong>> 10%:</strong> <span class="danger">Critical—system failure</span></p>
         </div>
         
         <div class="metric-card">
-            <h4>Ensemble Distribution Width</h4>
-            <p><strong>Narrow spread:</strong> Predictable performance across scenarios</p>
-            <p><strong>Wide spread:</strong> High operational volatility—some realities perform well, others catastrophically</p>
-            <p>The 95th percentile reveals your "worst case" planning scenario.</p>
+            <h4>The K vs. c Relationship</h4>
+            <p><strong>K = c:</strong> No queue—pure blocking model (ICU, hotel rooms)</p>
+            <p><strong>K > c:</strong> Queue allowed—waiting room/hallway capacity</p>
+            <p><strong>Optimal K:</strong> Balance blocking costs vs. waiting space costs</p>
         </div>
         
         <div class="metric-card">
-            <h4>The "Elbow" Point</h4>
-            <p>Adding servers reduces wait times with diminishing returns. The elbow is where marginal benefit drops sharply.</p>
-            <p><strong>Before elbow:</strong> Each server dramatically improves performance</p>
-            <p><strong>After elbow:</strong> Minimal improvement per additional server</p>
+            <h4>Cascade Effects</h4>
+            <p>When your facility blocks patients, they're diverted to neighbors. If all regional facilities operate near capacity, blocking creates a <strong>cascade failure</strong> where diversions compound across the network.</p>
+            <p>Industry best practice: Keep blocking < 5% to maintain regional resilience.</p>
         </div>
     </section>
 </div>
 
 <footer>
-    <p><strong>The Queueing Laboratory</strong> • M/M/c Standard Queue Model</p>
-    <p>Capacity planning under stochastic demand • All computation runs in your browser using Pyodide</p>
+    <p><strong>Chaos Lab</strong> • M/M/c/K Finite Capacity Model</p>
+    <p>All computation runs in your browser using Pyodide</p>
 </footer>
 
-<script src="simulation.js"></script>
 <script>
+    let pyodide;
+
     async function init() {
         pyodide = await loadPyodide();
         await pyodide.loadPackage(["numpy", "matplotlib"]);
@@ -283,41 +264,40 @@
             lam: parseFloat(document.getElementById('lam').value),
             mu: parseFloat(document.getElementById('mu').value),
             c: parseInt(document.getElementById('servers').value),
+            K: parseInt(document.getElementById('capacity').value),
             shockMult: shockMultiplier,
             targetWait: parseFloat(document.getElementById('target_wait').value),
             targetLoss: parseFloat(document.getElementById('target_loss').value)
         };
 
-        if (params.lam <= 0 || params.mu <= 0 || params.c <= 0) {
+        if (params.lam <= 0 || params.mu <= 0 || params.c <= 0 || params.K <= 0) {
             alert('Please ensure all parameters are positive values.');
             btn.disabled = false;
             btn.innerHTML = '<span>Execute Ensemble Simulation</span>';
             return;
         }
 
-        const rho = params.lam / (params.c * params.mu);
-        if (rho >= 1.0) {
-            const recommend = Math.ceil(params.lam / params.mu);
-            alert(`⚠ UNSTABLE SYSTEM: ρ = ${rho.toFixed(2)} ≥ 1.0\n\nMinimum servers: ${recommend}\nCurrent: ${params.c}`);
+        if (params.K < params.c) {
+            alert('⚠ Capacity K must be ≥ servers c');
             btn.disabled = false;
             btn.innerHTML = '<span>Execute Ensemble Simulation</span>';
             return;
         }
 
-        await runMMC(params);
+        await runCircular(params);
         
         btn.disabled = false;
         btn.innerHTML = '<span>Execute Ensemble Simulation</span>';
     }
 
-    async function runMMC(params) {
+    async function runCircular(params) {
         const code = `
 import numpy as np
 import matplotlib.pyplot as plt
 import io, base64
 
-def simulate_mmc_with_tracking(lam, mu, c, shock_mult):
-    """Simulate with time tracking for visualization"""
+def simulate_circular_with_tracking(lam, mu, c, K, shock_mult):
+    """Simulate with time tracking for blocking visualization"""
     t, dur = 0, 24
     arrs = []
     while t < dur:
@@ -328,31 +308,62 @@ def simulate_mmc_with_tracking(lam, mu, c, shock_mult):
     
     free = [0.0] * c
     waits = []
+    lost = 0
+    in_system = []
     
     # Track system state over time
     time_points = np.linspace(0, 24, 100)
-    queue_lengths = []
+    blocking_events = []
     arrival_rates = []
+    occupancy_levels = []
     
     for tp in time_points:
-        # Count how many in queue at this time point
-        in_queue = sum(1 for arr_t in arrs if arr_t <= tp and max(arr_t, min([f for f in free if f <= tp] or [0])) > tp)
-        queue_lengths.append(in_queue)
-        
         # Arrival rate at this time
         rate = lam * shock_mult if (shock_mult > 1 and 10 <= tp <= 12) else lam
         arrival_rates.append(rate)
+        
+        # Count blocking events in window around this time
+        window = 0.5  # 30 minute window
+        blocks_in_window = 0
+        arrivals_in_window = 0
+        for arr in arrs:
+            if tp - window/2 <= arr <= tp + window/2:
+                arrivals_in_window += 1
+        
+        # Estimate blocking rate
+        if arrivals_in_window > 0:
+            # Simplified: estimate based on system load
+            temp_in_sys = sum(1 for arr in arrs if arr <= tp and arr + 1/mu >= tp)
+            if temp_in_sys >= K * 0.9:
+                blocks_in_window = int(arrivals_in_window * 0.3)
+        blocking_events.append(blocks_in_window)
+        
+        # Occupancy level
+        occ = min(sum(1 for arr in arrs if arr <= tp and arr + 1/mu >= tp), K)
+        occupancy_levels.append(occ)
     
     for a_t in arrs:
+        in_system = [(arr, comp) for arr, comp in in_system if comp > a_t]
+        
+        if len(in_system) >= K:
+            lost += 1
+            continue
+        
         free.sort()
         start = max(a_t, free[0])
         w = (start - a_t) * 60
-        free[0] = start + np.random.exponential(1/mu)
+        
+        service_time = np.random.exponential(1/mu)
+        completion_time = start + service_time
+        free[0] = completion_time
         waits.append(w)
+        in_system.append((a_t, completion_time))
     
-    return np.mean(waits) if waits else 0, waits, time_points, queue_lengths, arrival_rates
+    avg_w = np.mean(waits) if waits else 0
+    loss_pct = (lost / len(arrs) * 100) if arrs else 0
+    return avg_w, loss_pct, time_points, blocking_events, arrival_rates, occupancy_levels
 
-def simulate_mmc(lam, mu, c, shock_mult):
+def simulate_circular(lam, mu, c, K, shock_mult):
     """Simple version for ensemble"""
     t, dur = 0, 24
     arrs = []
@@ -364,42 +375,56 @@ def simulate_mmc(lam, mu, c, shock_mult):
     
     free = [0.0] * c
     waits = []
+    lost = 0
+    in_system = []
     
     for a_t in arrs:
+        in_system = [(arr, comp) for arr, comp in in_system if comp > a_t]
+        
+        if len(in_system) >= K:
+            lost += 1
+            continue
+        
         free.sort()
         start = max(a_t, free[0])
         w = (start - a_t) * 60
-        free[0] = start + np.random.exponential(1/mu)
+        
+        service_time = np.random.exponential(1/mu)
+        completion_time = start + service_time
+        free[0] = completion_time
         waits.append(w)
+        in_system.append((a_t, completion_time))
     
-    return np.mean(waits) if waits else 0
+    avg_w = np.mean(waits) if waits else 0
+    loss_pct = (lost / len(arrs) * 100) if arrs else 0
+    return avg_w, loss_pct
 
 # Run one detailed simulation for time path
-mean_wait_detail, waits_detail, time_points, queue_lengths, arrival_rates = simulate_mmc_with_tracking(
-    ${params.lam}, ${params.mu}, ${params.c}, ${params.shockMult}
+mean_wait_detail, loss_detail, time_points, blocking_events, arrival_rates, occupancy = simulate_circular_with_tracking(
+    ${params.lam}, ${params.mu}, ${params.c}, ${params.K}, ${params.shockMult}
 )
 
 n_sims = 60
 ensemble_waits = []
+ensemble_loss = []
 
 for _ in range(n_sims):
-    w = simulate_mmc(${params.lam}, ${params.mu}, ${params.c}, ${params.shockMult})
+    w, l = simulate_circular(${params.lam}, ${params.mu}, ${params.c}, ${params.K}, ${params.shockMult})
     ensemble_waits.append(w)
+    ensemble_loss.append(l)
 
-rec_c = ${params.c}
+rec_K = ${params.K}
 found = False
 
-for test_c in range(1, 21):
-    rho = ${params.lam} / (test_c * ${params.mu})
-    if rho >= 1.0: continue
-    
-    test_ws = []
+for test_K in range(${params.c}, ${params.c} + 20):
+    test_ws, test_ls = [], []
     for _ in range(15):
-        w = simulate_mmc(${params.lam}, ${params.mu}, test_c, 1)  # No shock for recommendation
+        w, l = simulate_circular(${params.lam}, ${params.mu}, ${params.c}, test_K, 1)
         test_ws.append(w)
+        test_ls.append(l)
     
-    if np.mean(test_ws) <= ${params.targetWait}:
-        rec_c = test_c
+    if np.mean(test_ws) <= ${params.targetWait} and np.mean(test_ls) <= ${params.targetLoss}:
+        rec_K = test_K
         found = True
         break
 
@@ -410,6 +435,8 @@ fig.patch.set_facecolor('#f8fafb')
 ax.set_facecolor('#ffffff')
 
 mean_wait = np.mean(ensemble_waits)
+mean_loss = np.mean(ensemble_loss)
+
 n, bins, patches = ax.hist(ensemble_waits, bins=min(30, max(15, len(ensemble_waits)//3)), 
                             color='#4c1d95', edgecolor='white', alpha=0.85, linewidth=1.5)
 
@@ -421,7 +448,7 @@ ax.axvline(mean_wait, color='#84cc16', lw=4, label=f'Mean: {mean_wait:.1f} min',
 ax.axvline(${params.targetWait}, color='#6366f1', ls='--', lw=3, label=f'Target: ${params.targetWait} min', alpha=0.8)
 
 shock_label = "No Shock" if ${params.shockMult} == 1 else f"${params.shockMult}× Shock"
-ax.set_title(f'M/M/c Queue: Wait Time Distribution (n={n_sims})\\nServers: ${params.c} | ρ = {(${params.lam}/(${params.c}*${params.mu})):.2f} | {shock_label}', 
+ax.set_title(f'M/M/c/K Queue: Wait Time Distribution (n={n_sims})\\nc={${params.c}}, K={${params.K}} | Blocking: {mean_loss:.1f}% | {shock_label}', 
              fontsize=14, fontweight='bold', color='#1a0d2e', pad=20)
 ax.set_xlabel('Average Wait Time (Minutes)', fontsize=12, fontweight='bold', color='#2e1065')
 ax.set_ylabel('Frequency', fontsize=12, fontweight='bold', color='#2e1065')
@@ -447,23 +474,30 @@ if ${params.shockMult} > 1:
     ax1.axvspan(10, 12, alpha=0.2, color='#dc2626', label='Shock Period')
 
 ax1.set_ylabel('Arrival Rate (patients/hr)', fontsize=11, fontweight='bold', color='#2e1065')
-ax1.set_title('System Dynamics Over 24 Hours', fontsize=14, fontweight='bold', color='#1a0d2e', pad=15)
+ax1.set_title('M/M/c/K System Dynamics Over 24 Hours', fontsize=14, fontweight='bold', color='#1a0d2e', pad=15)
 ax1.legend(loc='upper right', fontsize=10)
 ax1.grid(True, alpha=0.2)
 ax1.set_xlim(0, 24)
 
-# Plot 2: Queue Length Over Time
+# Plot 2: Occupancy and Blocking Over Time
+ax2_twin = ax2.twinx()
 ax2.set_facecolor('#ffffff')
-ax2.fill_between(time_points, queue_lengths, alpha=0.3, color='#a78bfa')
-ax2.plot(time_points, queue_lengths, color='#4c1d95', linewidth=3, label='Queue Length')
+
+# Occupancy level
+ax2.fill_between(time_points, occupancy, alpha=0.3, color='#a78bfa', label='Occupancy')
+ax2.plot(time_points, occupancy, color='#4c1d95', linewidth=3, label='System Occupancy')
+ax2.axhline(${params.K}, color='#dc2626', linestyle='--', linewidth=2, alpha=0.7, label='Capacity Limit (K)')
+
+# Blocking events on secondary axis
+ax2_twin.bar(time_points, blocking_events, width=0.2, alpha=0.5, color='#dc2626', label='Blocking Events')
 
 if ${params.shockMult} > 1:
-    ax2.axvspan(10, 12, alpha=0.2, color='#dc2626', label='Shock Period')
-    # Mark recovery point (when queue returns to near-baseline)
-    baseline_queue = np.mean(queue_lengths[0:40])  # First 10 hours
+    ax2.axvspan(10, 12, alpha=0.2, color='#dc2626')
+    # Mark recovery point
+    baseline_occ = np.mean(occupancy[0:40])
     recovery_idx = None
-    for i in range(50, len(queue_lengths)):  # After hour 12
-        if queue_lengths[i] <= baseline_queue * 1.2:
+    for i in range(50, len(occupancy)):
+        if occupancy[i] <= baseline_occ * 1.2:
             recovery_idx = i
             break
     if recovery_idx:
@@ -472,8 +506,10 @@ if ${params.shockMult} > 1:
                    label=f'Recovery (~{recovery_time:.1f}hr)')
 
 ax2.set_xlabel('Time (hours)', fontsize=11, fontweight='bold', color='#2e1065')
-ax2.set_ylabel('Patients in Queue', fontsize=11, fontweight='bold', color='#2e1065')
-ax2.legend(loc='upper right', fontsize=10)
+ax2.set_ylabel('System Occupancy (patients)', fontsize=11, fontweight='bold', color='#2e1065')
+ax2_twin.set_ylabel('Blocking Events', fontsize=10, color='#dc2626')
+ax2.legend(loc='upper left', fontsize=10)
+ax2_twin.legend(loc='upper right', fontsize=9)
 ax2.grid(True, alpha=0.2)
 ax2.set_xlim(0, 24)
 
@@ -485,17 +521,21 @@ time_img = base64.b64encode(buf2.getvalue()).decode('utf-8')
 
 # Generate text report
 report = "═══════════════════════════════════════\\n"
-report += "  M/M/c SIMULATION RESULTS\\n"
+report += "  M/M/c/K SIMULATION RESULTS\\n"
 report += "═══════════════════════════════════════\\n\\n"
 report += f"Configuration:\\n"
-report += f"  • Servers: ${params.c}\\n"
+report += f"  • Servers (c): ${params.c}\\n"
+report += f"  • Max Capacity (K): ${params.K}\\n"
 report += f"  • Arrival Rate: ${params.lam}/hr\\n"
-report += f"  • Service Rate: ${params.mu}/hr\\n"
-report += f"  • Utilization: {(${params.lam}/(${params.c}*${params.mu})):.1%}\\n\\n"
+report += f"  • Service Rate: ${params.mu}/hr\\n\\n"
 report += f"Performance (n={n_sims}):\\n"
 report += f"  • Mean Wait: {mean_wait:.1f} min\\n"
 report += f"  • Std Dev: {np.std(ensemble_waits):.1f} min\\n"
-report += f"  • Median: {np.median(ensemble_waits):.1f} min\\n"
+report += f"  • Blocking Rate: {mean_loss:.2f}%"
+if mean_loss > 10:
+    report += " ⚠ High!\\n"
+else:
+    report += "\\n"
 report += f"  • 95th %ile: {np.percentile(ensemble_waits, 95):.1f} min\\n"
 
 if ${params.shockMult} == 1:
@@ -510,14 +550,14 @@ else:
 report += f"\\nShock: {shock_text}\\n"
 
 if found:
-    rec_text = f"✓ RECOMMENDED: {rec_c} Servers\\n\\nMeets target ≤ ${params.targetWait} min"
-    savings = ${params.c} - rec_c
-    if savings > 0:
-        rec_text += f"\\n\\nOptimization: -{savings} server(s)"
-    elif savings < 0:
-        rec_text += f"\\n\\n⚠ Add {abs(savings)} server(s)"
+    rec_text = f"✓ RECOMMENDED K: {rec_K} slots\\n\\nMeets targets:\\n  • Wait ≤ ${params.targetWait} min\\n  • Blocking ≤ ${params.targetLoss}%"
+    expansion = rec_K - ${params.K}
+    if expansion > 0:
+        rec_text += f"\\n\\n💡 Add {expansion} capacity slots"
+    elif expansion < 0:
+        rec_text += f"\\n\\n✓ Can reduce by {abs(expansion)} slots"
 else:
-    rec_text = "⚠ Target unreachable\\nConsider demand management"
+    rec_text = "⚠ Target unreachable\\nConsider capacity expansion\\nor demand management"
 
 (report, img, time_img, rec_text)
         `;

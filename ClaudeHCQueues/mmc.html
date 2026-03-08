@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>M/M/c Standard Queue | The Queueing Laboratory</title>
+    <title>M/M/c Standard Queue | Chaos Lab</title>
     <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,7 +15,7 @@
 
 <nav>
     <div class="container">
-        <a href="index.html" class="logo">Queue Lab</a>
+        <a href="index.html" class="logo">Chaos Lab</a>
         <div class="nav-links">
             <a href="index.html">Home</a>
             <a href="mmc.html" class="active">M/M/c Standard</a>
@@ -97,10 +97,10 @@
     </section>
 
     <section class="example-section">
-        <h2>Real-World Applications Across Industries</h2>
+        <h2>Real-World Example: Emergency Department Physician Staffing</h2>
         
         <div class="example-card">
-            <h3>Healthcare: Emergency Department Physician Staffing</h3>
+            <h3>Scenario: Metro General Hospital ED</h3>
             
             <p><strong>Operational Context:</strong></p>
             <ul>
@@ -109,36 +109,15 @@
                 <li>Current staffing: <strong>3 physicians</strong> (c = 3)</li>
                 <li>Target: Wait time < 20 minutes for 90% of patients</li>
             </ul>
-            <p><strong>Analysis:</strong> Utilization ρ = 12/(3×4) = 1.0 → <span class="warning">UNSTABLE!</span> The system is at critical threshold. Small fluctuations create unbounded queues.</p>
-        </div>
-        
-        <div class="example-card">
-            <h3>Manufacturing: Quality Inspection Stations</h3>
             
-            <p><strong>Operational Context:</strong></p>
-            <ul>
-                <li>Parts arriving: <strong>180 units/hour</strong> (λ = 180)</li>
-                <li>Inspection time: <strong>2 minutes/part</strong> (μ = 30 units/hour/inspector)</li>
-                <li>Current staffing: <strong>7 inspectors</strong> (c = 7)</li>
-                <li>Target: Minimize work-in-process inventory (waiting parts)</li>
-            </ul>
-            <p><strong>Analysis:</strong> Utilization ρ = 180/(7×30) = 0.86. Operating near the "elbow"—adding 1 inspector dramatically reduces queue length.</p>
-        </div>
-        
-        <div class="example-card">
-            <h3>Call Center: Customer Service Representatives</h3>
+            <p><strong>Analysis:</strong></p>
+            <p>Current utilization: ρ = 12/(3×4) = 1.0 → <span class="warning">UNSTABLE!</span></p>
+            <p>The system is at the critical threshold. Small fluctuations will create unbounded queues.</p>
             
-            <p><strong>Operational Context:</strong></p>
-            <ul>
-                <li>Incoming calls: <strong>240 calls/hour</strong> (λ = 240)</li>
-                <li>Average handle time: <strong>5 minutes</strong> (μ = 12 calls/hour/agent)</li>
-                <li>Current staffing: <strong>25 agents</strong> (c = 25)</li>
-                <li>Target: Average speed of answer (ASA) < 30 seconds</li>
-            </ul>
-            <p><strong>Analysis:</strong> Utilization ρ = 240/(25×12) = 0.80. Adequate for steady-state but vulnerable to surge events (product launches, outages).</p>
+            <p><strong>Simulation Question:</strong> How many physicians are needed to achieve the 20-minute target?</p>
             
             <div class="hint-box">
-                💡 <strong>Try this:</strong> Test these scenarios in the simulator below. Enable shock simulation to test surge resilience across industries—whether it's a mass casualty event (healthcare), machine breakdown (manufacturing), or service outage (call center).
+                💡 <strong>Try this:</strong> Input λ=12, μ=4, test c=3,4,5 and compare. Set target wait to 20 minutes. Enable shock simulation to test surge resilience.
             </div>
         </div>
     </section>
@@ -253,8 +232,8 @@
 </div>
 
 <footer>
-    <p><strong>The Queueing Laboratory</strong> • M/M/c Standard Queue Model</p>
-    <p>Capacity planning under stochastic demand • All computation runs in your browser using Pyodide</p>
+    <p><strong>Chaos Lab</strong> • M/M/c Standard Queue Model</p>
+    <p>All computation runs in your browser using Pyodide</p>
 </footer>
 
 <script src="simulation.js"></script>

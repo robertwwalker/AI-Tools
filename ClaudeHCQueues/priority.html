@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>M/M/c Standard Queue | The Queueing Laboratory</title>
+    <title>Priority Queue | Chaos Lab</title>
     <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,12 +15,12 @@
 
 <nav>
     <div class="container">
-        <a href="index.html" class="logo">Queue Lab</a>
+        <a href="index.html" class="logo">Chaos Lab</a>
         <div class="nav-links">
             <a href="index.html">Home</a>
-            <a href="mmc.html" class="active">M/M/c Standard</a>
+            <a href="mmc.html">M/M/c Standard</a>
             <a href="circular.html">Finite Capacity</a>
-            <a href="priority.html">Priority Queue</a>
+            <a href="priority.html" class="active">Priority Queue</a>
             <a href="reneging.html">Reneging</a>
         </div>
     </div>
@@ -28,15 +28,15 @@
 
 <div class="container">
     <div class="page-header">
-        <h1>M/M/c Standard Queue</h1>
-        <p class="subtitle">Multi-Server Queueing with Surge Analysis & Recovery Dynamics</p>
+        <h1>Priority Queue (Non-Preemptive)</h1>
+        <p class="subtitle">Triage Systems, Variance Redistribution & Class-Specific Dynamics</p>
     </div>
 
     <aside class="variable-sidebar">
         <h3>Model Variables</h3>
         <div class="var-item">
             <strong>λ (lambda)</strong>
-            <p>Arrival rate (patients/hour)</p>
+            <p>Total arrival rate (patients/hour)</p>
         </div>
         <div class="var-item">
             <strong>μ (mu)</strong>
@@ -44,122 +44,107 @@
         </div>
         <div class="var-item">
             <strong>c</strong>
-            <p>Number of servers (doctors, nurses, etc.)</p>
+            <p>Number of servers</p>
         </div>
         <div class="var-item">
-            <strong>ρ (rho)</strong>
-            <p>Utilization = λ/(c×μ)</p>
+            <strong>p<sub>high</sub></strong>
+            <p>Proportion of high-priority arrivals (0-100%)</p>
+        </div>
+        <div class="var-item">
+            <strong>ρ<sub>1</sub></strong>
+            <p>High-priority utilization = (λ×p<sub>high</sub>)/(c×μ)</p>
+        </div>
+        <div class="var-item">
+            <strong>ρ<sub>2</sub></strong>
+            <p>Low-priority utilization = (λ×(1-p<sub>high</sub>))/(c×μ)</p>
+        </div>
+        <div class="var-item">
+            <strong>ρ</strong>
+            <p>Total utilization = ρ<sub>1</sub> + ρ<sub>2</sub></p>
             <p class="var-note">Must be < 1 for stability</p>
-        </div>
-        <div class="var-item">
-            <strong>W<sub>q</sub></strong>
-            <p>Average wait time in queue</p>
-        </div>
-        <div class="var-item">
-            <strong>L<sub>q</sub></strong>
-            <p>Average queue length</p>
         </div>
     </aside>
 
     <section class="theory-section">
         <h2>Mathematical Foundation</h2>
         
-        <p>The M/M/c queue represents the canonical multi-server system with <strong>Markovian (memoryless) arrivals</strong> and <strong>Markovian service times</strong>, serving c parallel servers. This model assumes unlimited waiting capacity—patients can queue indefinitely.</p>
+        <p>Priority queueing implements <strong>triage logic</strong> where customers are classified into priority classes. High-priority customers are served before low-priority customers, but service is <em>non-preemptive</em>—once a patient enters treatment, they are not interrupted.</p>
         
-        <h3>The Stability Criterion</h3>
-        <p>System stability requires that total service capacity exceeds arrival rate:</p>
+        <h3>The Fundamental Trade-Off</h3>
+        <p><strong>Priority systems do not create capacity.</strong> They redistribute waiting time variance: reducing wait for critical patients comes at the direct expense of stable patients who absorb the "variance burden."</p>
+        
+        <h3>Two-Class Wait Time Formula</h3>
+        <p>For a two-priority system, the average wait time for low-priority (Class 2) patients is:</p>
         
         <div class="math-box">
-            $$\rho = \frac{\lambda}{c\mu} < 1$$
+            $$W_{\text{class 2}} = \frac{E[S^2]\lambda}{2(1-\rho_1)(1-\rho_1-\rho_2)}$$
         </div>
         
-        <p>Where <strong>ρ</strong> is the system utilization factor. When ρ ≥ 1, the queue grows without bound.</p>
+        <p>Where:</p>
+        <ul>
+            <li><strong>E[S²]</strong> = second moment of service time</li>
+            <li><strong>ρ₁</strong> = utilization from high-priority arrivals</li>
+            <li><strong>ρ₂</strong> = utilization from low-priority arrivals</li>
+        </ul>
         
-        <h3>The Erlang C Formula</h3>
-        <p>The probability that an arriving customer must wait (all servers busy) is given by Erlang's C formula:</p>
-        
-        <div class="math-box">
-            $$C(c, \lambda/\mu) = \frac{\frac{(c\rho)^c}{c!(1-\rho)}}{P_0^{-1}}$$
-        </div>
-        
-        <p>Where P₀ is the probability all servers are idle:</p>
-        
-        <div class="math-box">
-            $$P_0 = \left[\sum_{n=0}^{c-1} \frac{(c\rho)^n}{n!} + \frac{(c\rho)^c}{c!(1-\rho)}\right]^{-1}$$
-        </div>
-        
-        <h3>Average Wait Time</h3>
-        <p>For those who must wait, the average queue time is:</p>
+        <h3>The Nonlinear Penalty</h3>
+        <p>The denominator <strong>(1-ρ₁)(1-ρ₁-ρ₂)</strong> creates exponential wait time growth for low-priority patients as system load increases:</p>
         
         <div class="math-box">
-            $$W_q = \frac{C(c, \lambda/\mu)}{c\mu - \lambda}$$
+            $$\text{Wait Ratio} = \frac{W_{\text{class 2}}}{W_{\text{class 1}}} \rightarrow \infty \text{ as } \rho \rightarrow 1$$
         </div>
     </section>
 
     <section class="example-section">
-        <h2>Real-World Applications Across Industries</h2>
+        <h2>Real-World Example: Emergency Department Triage</h2>
         
         <div class="example-card">
-            <h3>Healthcare: Emergency Department Physician Staffing</h3>
+            <h3>Scenario: ESI-Based Triage System</h3>
             
             <p><strong>Operational Context:</strong></p>
             <ul>
-                <li>Average arrival rate: <strong>12 patients/hour</strong> (λ = 12)</li>
-                <li>Average service time per physician: <strong>15 minutes</strong> (μ = 4 patients/hour/physician)</li>
-                <li>Current staffing: <strong>3 physicians</strong> (c = 3)</li>
-                <li>Target: Wait time < 20 minutes for 90% of patients</li>
+                <li>Total arrival rate: <strong>15 patients/hour</strong></li>
+                <li>ESI 1-2 (Critical): <strong>30% of arrivals</strong> → 4.5/hour</li>
+                <li>ESI 3-5 (Stable): <strong>70% of arrivals</strong> → 10.5/hour</li>
+                <li>Average service time: <strong>20 minutes</strong> (μ = 3/hour)</li>
+                <li>Physicians on duty: <strong>5</strong></li>
+                <li>Policy: ESI 1-2 always seen before ESI 3-5</li>
             </ul>
-            <p><strong>Analysis:</strong> Utilization ρ = 12/(3×4) = 1.0 → <span class="warning">UNSTABLE!</span> The system is at critical threshold. Small fluctuations create unbounded queues.</p>
-        </div>
-        
-        <div class="example-card">
-            <h3>Manufacturing: Quality Inspection Stations</h3>
             
-            <p><strong>Operational Context:</strong></p>
-            <ul>
-                <li>Parts arriving: <strong>180 units/hour</strong> (λ = 180)</li>
-                <li>Inspection time: <strong>2 minutes/part</strong> (μ = 30 units/hour/inspector)</li>
-                <li>Current staffing: <strong>7 inspectors</strong> (c = 7)</li>
-                <li>Target: Minimize work-in-process inventory (waiting parts)</li>
-            </ul>
-            <p><strong>Analysis:</strong> Utilization ρ = 180/(7×30) = 0.86. Operating near the "elbow"—adding 1 inspector dramatically reduces queue length.</p>
-        </div>
-        
-        <div class="example-card">
-            <h3>Call Center: Customer Service Representatives</h3>
+            <p><strong>Analysis:</strong></p>
+            <p>Total utilization: ρ = 15/(5×3) = 1.0 → At stability threshold</p>
+            <p>High-priority utilization: ρ₁ = 4.5/(5×3) = 0.30</p>
+            <p>Low-priority utilization: ρ₂ = 10.5/(5×3) = 0.70</p>
             
-            <p><strong>Operational Context:</strong></p>
-            <ul>
-                <li>Incoming calls: <strong>240 calls/hour</strong> (λ = 240)</li>
-                <li>Average handle time: <strong>5 minutes</strong> (μ = 12 calls/hour/agent)</li>
-                <li>Current staffing: <strong>25 agents</strong> (c = 25)</li>
-                <li>Target: Average speed of answer (ASA) < 30 seconds</li>
-            </ul>
-            <p><strong>Analysis:</strong> Utilization ρ = 240/(25×12) = 0.80. Adequate for steady-state but vulnerable to surge events (product launches, outages).</p>
+            <p><strong>Predicted Outcome:</strong> ESI 1-2 patients see minimal wait, while ESI 3-5 patients experience extreme delays. At 80% total utilization, low-priority wait might be 5-10× higher than high-priority.</p>
             
             <div class="hint-box">
-                💡 <strong>Try this:</strong> Test these scenarios in the simulator below. Enable shock simulation to test surge resilience across industries—whether it's a mass casualty event (healthcare), machine breakdown (manufacturing), or service outage (call center).
+                💡 <strong>Try this:</strong> Input λ=15, μ=3, c=5, Priority %=30. Compare wait times to standard M/M/c with same parameters. Notice how variance shifts.
             </div>
         </div>
     </section>
 
     <section class="lab-section">
         <h2>Interactive Simulation Laboratory</h2>
-        <p>Run ensemble simulations (60 parallel realities) to analyze queue behavior under various conditions. Test multiple shock scenarios (2×, 3×, 5× surge arrivals) and visualize system dynamics including queue evolution and recovery time.</p>
+        <p>Explore triage systems where high-priority patients receive preferential service. Analyze variance redistribution dynamics—how priority schemes shift waiting time from critical to stable patients. Time-path visualizations show class-specific wait times and the wait time ratio evolution during surge events.</p>
         
         <div class="lab-ui">
             <div class="control-grid">
                 <div class="control-group">
                     <label>Arrivals (λ/hr)</label>
-                    <input type="number" id="lam" value="12" step="0.5" min="0">
+                    <input type="number" id="lam" value="15" step="0.5" min="0">
                 </div>
                 <div class="control-group">
                     <label>Service (μ/hr/Server)</label>
-                    <input type="number" id="mu" value="4" step="0.25" min="0.1">
+                    <input type="number" id="mu" value="3" step="0.25" min="0.1">
                 </div>
                 <div class="control-group">
-                    <label>Current Servers (c)</label>
-                    <input type="number" id="servers" value="4" step="1" min="1">
+                    <label>Servers (c)</label>
+                    <input type="number" id="servers" value="5" step="1" min="1">
+                </div>
+                <div class="control-group">
+                    <label>High Priority %</label>
+                    <input type="number" id="priority_pct" value="30" step="5" min="0" max="100">
                 </div>
             </div>
 
@@ -168,7 +153,7 @@
                 <div class="control-grid" style="margin-top:15px;">
                     <div class="control-group">
                         <label>Target Max Wait (min)</label>
-                        <input type="number" id="target_wait" value="20" step="5" min="5">
+                        <input type="number" id="target_wait" value="25" step="5" min="5">
                     </div>
                     <div class="control-group">
                         <label>Acceptable Loss (%)</label>
@@ -191,6 +176,9 @@
                     </label>
                     <label class="shock-radio">
                         <input type="radio" name="shock" value="3x">
+                        <span>3× Surge (High)</span>
+                    </label>
+                    <label class="shock-radio">
                         <input type="radio" name="shock" value="5x">
                         <span>5× Surge (Extreme)</span>
                     </label>
@@ -213,8 +201,8 @@
                 </div>
                 
                 <div class="time-path-section">
-                    <h3>System Dynamics & Recovery Analysis</h3>
-                    <p>This visualization shows how the system evolves over 24 hours, including queue buildup during shock and recovery time afterward.</p>
+                    <h3>System Dynamics & Variance Redistribution</h3>
+                    <p>Shows how priority queueing shifts waiting time variance from high-priority to low-priority patients over time.</p>
                     <div class="img-wrap">
                         <img id="time-plot-img" src="" alt="Time Path Analysis" />
                     </div>
@@ -226,39 +214,41 @@
     <section class="interpretation-section">
         <h2>Interpreting Your Results</h2>
         
-        <h3>Key Metrics Explained</h3>
+        <h3>Equity Considerations</h3>
         
         <div class="metric-card">
-            <h4>Utilization (ρ)</h4>
-            <p><strong>< 70%:</strong> <span class="good">Low stress, highly responsive</span></p>
-            <p><strong>70-85%:</strong> <span class="ok">Efficient, manageable volatility</span></p>
-            <p><strong>85-95%:</strong> <span class="warning">High volatility, vulnerable to shocks</span></p>
-            <p><strong>≥ 95%:</strong> <span class="danger">Extreme wait times, system fragility</span></p>
+            <h4>Wait Time Disparity</h4>
+            <p>The simulation shows <strong>aggregate</strong> wait time. In reality:</p>
+            <p><strong>High-priority patients:</strong> See dramatically reduced waits (often 50-80% reduction)</p>
+            <p><strong>Low-priority patients:</strong> Experience 2-20× longer waits depending on utilization</p>
+            <p>This creates ethical questions about fairness vs. medical necessity.</p>
         </div>
         
         <div class="metric-card">
-            <h4>Ensemble Distribution Width</h4>
-            <p><strong>Narrow spread:</strong> Predictable performance across scenarios</p>
-            <p><strong>Wide spread:</strong> High operational volatility—some realities perform well, others catastrophically</p>
-            <p>The 95th percentile reveals your "worst case" planning scenario.</p>
+            <h4>System Stress Amplification</h4>
+            <p><strong>At 70% utilization:</strong> Priority has modest effect (~2× ratio)</p>
+            <p><strong>At 85% utilization:</strong> Low-priority waits explode (~8× ratio)</p>
+            <p><strong>At 95% utilization:</strong> Low-priority waits become extreme (~20× ratio)</p>
+            <p>Priority systems become increasingly unfair as load increases.</p>
         </div>
         
         <div class="metric-card">
-            <h4>The "Elbow" Point</h4>
-            <p>Adding servers reduces wait times with diminishing returns. The elbow is where marginal benefit drops sharply.</p>
-            <p><strong>Before elbow:</strong> Each server dramatically improves performance</p>
-            <p><strong>After elbow:</strong> Minimal improvement per additional server</p>
+            <h4>Clinical Implications</h4>
+            <p><strong>Appropriate use:</strong> True emergencies (STEMI, stroke, trauma) where time = life</p>
+            <p><strong>Problematic use:</strong> VIP treatment, financial status, physician preference</p>
+            <p><strong>Mitigation:</strong> Fast-track systems that physically separate low-acuity patients into parallel streams with dedicated providers</p>
         </div>
     </section>
 </div>
 
 <footer>
-    <p><strong>The Queueing Laboratory</strong> • M/M/c Standard Queue Model</p>
-    <p>Capacity planning under stochastic demand • All computation runs in your browser using Pyodide</p>
+    <p><strong>Chaos Lab</strong> • Priority Queue Model</p>
+    <p>All computation runs in your browser using Pyodide</p>
 </footer>
 
-<script src="simulation.js"></script>
 <script>
+    let pyodide;
+
     async function init() {
         pyodide = await loadPyodide();
         await pyodide.loadPackage(["numpy", "matplotlib"]);
@@ -283,6 +273,7 @@
             lam: parseFloat(document.getElementById('lam').value),
             mu: parseFloat(document.getElementById('mu').value),
             c: parseInt(document.getElementById('servers').value),
+            priority_pct: parseFloat(document.getElementById('priority_pct').value),
             shockMult: shockMultiplier,
             targetWait: parseFloat(document.getElementById('target_wait').value),
             targetLoss: parseFloat(document.getElementById('target_loss').value)
@@ -304,55 +295,81 @@
             return;
         }
 
-        await runMMC(params);
+        await runPriority(params);
         
         btn.disabled = false;
         btn.innerHTML = '<span>Execute Ensemble Simulation</span>';
     }
 
-    async function runMMC(params) {
+    async function runPriority(params) {
         const code = `
 import numpy as np
 import matplotlib.pyplot as plt
 import io, base64
 
-def simulate_mmc_with_tracking(lam, mu, c, shock_mult):
-    """Simulate with time tracking for visualization"""
+def simulate_priority_with_tracking(lam, mu, c, priority_pct, shock_mult):
+    """Simulate with separate tracking for Class 1 and Class 2"""
     t, dur = 0, 24
     arrs = []
     while t < dur:
         l = lam * shock_mult if (shock_mult > 1 and 10 <= t <= 12) else lam
         t += np.random.exponential(1/l)
         if t < dur:
-            arrs.append(t)
+            p = 1 if np.random.random() < (priority_pct/100) else 2
+            arrs.append((t, p))
+    
+    # Sort by priority
+    arrs.sort(key=lambda x: (x[0] if x[1]==1 else x[0]+1000))
     
     free = [0.0] * c
-    waits = []
+    waits_c1 = []
+    waits_c2 = []
+    all_waits = []
     
-    # Track system state over time
+    # Track over time
     time_points = np.linspace(0, 24, 100)
-    queue_lengths = []
+    wait_ratio_over_time = []
     arrival_rates = []
+    class1_waits_time = []
+    class2_waits_time = []
     
-    for tp in time_points:
-        # Count how many in queue at this time point
-        in_queue = sum(1 for arr_t in arrs if arr_t <= tp and max(arr_t, min([f for f in free if f <= tp] or [0])) > tp)
-        queue_lengths.append(in_queue)
-        
-        # Arrival rate at this time
-        rate = lam * shock_mult if (shock_mult > 1 and 10 <= tp <= 12) else lam
-        arrival_rates.append(rate)
-    
-    for a_t in arrs:
+    for a_t, p in arrs:
         free.sort()
         start = max(a_t, free[0])
         w = (start - a_t) * 60
         free[0] = start + np.random.exponential(1/mu)
-        waits.append(w)
+        all_waits.append(w)
+        if p == 1:
+            waits_c1.append(w)
+        else:
+            waits_c2.append(w)
     
-    return np.mean(waits) if waits else 0, waits, time_points, queue_lengths, arrival_rates
+    # Calculate metrics over time
+    for tp in time_points:
+        # Arrival rate
+        rate = lam * shock_mult if (shock_mult > 1 and 10 <= tp <= 12) else lam
+        arrival_rates.append(rate)
+        
+        # Average waits in windows
+        window = 1.0  # 1 hour window
+        c1_in_window = [w for w, (t, p) in zip(all_waits, arrs) if p == 1 and tp - window/2 <= t <= tp + window/2]
+        c2_in_window = [w for w, (t, p) in zip(all_waits, arrs) if p == 2 and tp - window/2 <= t <= tp + window/2]
+        
+        avg_c1 = np.mean(c1_in_window) if c1_in_window else 1
+        avg_c2 = np.mean(c2_in_window) if c2_in_window else 1
+        
+        class1_waits_time.append(avg_c1)
+        class2_waits_time.append(avg_c2)
+        
+        # Ratio (how much worse Class 2 is than Class 1)
+        ratio = avg_c2 / avg_c1 if avg_c1 > 0 else 1
+        wait_ratio_over_time.append(ratio)
+    
+    return (np.mean(all_waits) if all_waits else 0, time_points, wait_ratio_over_time, 
+            arrival_rates, class1_waits_time, class2_waits_time,
+            np.mean(waits_c1) if waits_c1 else 0, np.mean(waits_c2) if waits_c2 else 0)
 
-def simulate_mmc(lam, mu, c, shock_mult):
+def simulate_priority(lam, mu, c, priority_pct, shock_mult):
     """Simple version for ensemble"""
     t, dur = 0, 24
     arrs = []
@@ -360,12 +377,15 @@ def simulate_mmc(lam, mu, c, shock_mult):
         l = lam * shock_mult if (shock_mult > 1 and 10 <= t <= 12) else lam
         t += np.random.exponential(1/l)
         if t < dur:
-            arrs.append(t)
+            p = 1 if np.random.random() < (priority_pct/100) else 2
+            arrs.append((t, p))
+    
+    arrs.sort(key=lambda x: (x[0] if x[1]==1 else x[0]+1000))
     
     free = [0.0] * c
     waits = []
     
-    for a_t in arrs:
+    for a_t, p in arrs:
         free.sort()
         start = max(a_t, free[0])
         w = (start - a_t) * 60
@@ -374,16 +394,17 @@ def simulate_mmc(lam, mu, c, shock_mult):
     
     return np.mean(waits) if waits else 0
 
-# Run one detailed simulation for time path
-mean_wait_detail, waits_detail, time_points, queue_lengths, arrival_rates = simulate_mmc_with_tracking(
-    ${params.lam}, ${params.mu}, ${params.c}, ${params.shockMult}
+# Run one detailed simulation
+(mean_wait_detail, time_points, wait_ratio, arrival_rates, c1_waits, c2_waits, 
+ c1_mean, c2_mean) = simulate_priority_with_tracking(
+    ${params.lam}, ${params.mu}, ${params.c}, ${params.priority_pct}, ${params.shockMult}
 )
 
 n_sims = 60
 ensemble_waits = []
 
 for _ in range(n_sims):
-    w = simulate_mmc(${params.lam}, ${params.mu}, ${params.c}, ${params.shockMult})
+    w = simulate_priority(${params.lam}, ${params.mu}, ${params.c}, ${params.priority_pct}, ${params.shockMult})
     ensemble_waits.append(w)
 
 rec_c = ${params.c}
@@ -395,7 +416,7 @@ for test_c in range(1, 21):
     
     test_ws = []
     for _ in range(15):
-        w = simulate_mmc(${params.lam}, ${params.mu}, test_c, 1)  # No shock for recommendation
+        w = simulate_priority(${params.lam}, ${params.mu}, test_c, ${params.priority_pct}, 1)
         test_ws.append(w)
     
     if np.mean(test_ws) <= ${params.targetWait}:
@@ -421,7 +442,7 @@ ax.axvline(mean_wait, color='#84cc16', lw=4, label=f'Mean: {mean_wait:.1f} min',
 ax.axvline(${params.targetWait}, color='#6366f1', ls='--', lw=3, label=f'Target: ${params.targetWait} min', alpha=0.8)
 
 shock_label = "No Shock" if ${params.shockMult} == 1 else f"${params.shockMult}× Shock"
-ax.set_title(f'M/M/c Queue: Wait Time Distribution (n={n_sims})\\nServers: ${params.c} | ρ = {(${params.lam}/(${params.c}*${params.mu})):.2f} | {shock_label}', 
+ax.set_title(f'Priority Queue: Wait Time Distribution (n={n_sims})\\nServers: ${params.c} | High Priority: ${params.priority_pct}% | {shock_label}', 
              fontsize=14, fontweight='bold', color='#1a0d2e', pad=20)
 ax.set_xlabel('Average Wait Time (Minutes)', fontsize=12, fontweight='bold', color='#2e1065')
 ax.set_ylabel('Frequency', fontsize=12, fontweight='bold', color='#2e1065')
@@ -438,42 +459,40 @@ img = base64.b64encode(buf.getvalue()).decode('utf-8')
 fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 8))
 fig.patch.set_facecolor('#f8fafb')
 
-# Plot 1: Arrival Rate Over Time
+# Plot 1: Arrival Rate
 ax1.set_facecolor('#ffffff')
-ax1.plot(time_points, arrival_rates, color='#4c1d95', linewidth=3, label='Arrival Rate')
+ax1.plot(time_points, arrival_rates, color='#4c1d95', linewidth=3, label='Total Arrival Rate')
 ax1.axhline(${params.lam}, color='#84cc16', linestyle='--', linewidth=2, alpha=0.7, label='Baseline Rate')
 
 if ${params.shockMult} > 1:
     ax1.axvspan(10, 12, alpha=0.2, color='#dc2626', label='Shock Period')
 
 ax1.set_ylabel('Arrival Rate (patients/hr)', fontsize=11, fontweight='bold', color='#2e1065')
-ax1.set_title('System Dynamics Over 24 Hours', fontsize=14, fontweight='bold', color='#1a0d2e', pad=15)
+ax1.set_title('Priority Queue: Variance Redistribution Dynamics', fontsize=14, fontweight='bold', color='#1a0d2e', pad=15)
 ax1.legend(loc='upper right', fontsize=10)
 ax1.grid(True, alpha=0.2)
 ax1.set_xlim(0, 24)
 
-# Plot 2: Queue Length Over Time
+# Plot 2: Wait Time Comparison and Ratio
+ax2_twin = ax2.twinx()
 ax2.set_facecolor('#ffffff')
-ax2.fill_between(time_points, queue_lengths, alpha=0.3, color='#a78bfa')
-ax2.plot(time_points, queue_lengths, color='#4c1d95', linewidth=3, label='Queue Length')
+
+# Class-specific wait times
+ax2.plot(time_points, c1_waits, color='#84cc16', linewidth=3, label='Class 1 (High Priority)', alpha=0.8)
+ax2.plot(time_points, c2_waits, color='#dc2626', linewidth=3, label='Class 2 (Low Priority)', alpha=0.8)
+
+# Wait time ratio on secondary axis
+ax2_twin.plot(time_points, wait_ratio, color='#a78bfa', linewidth=2, linestyle='--', label='Wait Ratio (C2/C1)', alpha=0.7)
+ax2_twin.axhline(1, color='#666', linestyle=':', linewidth=1, alpha=0.5)
 
 if ${params.shockMult} > 1:
-    ax2.axvspan(10, 12, alpha=0.2, color='#dc2626', label='Shock Period')
-    # Mark recovery point (when queue returns to near-baseline)
-    baseline_queue = np.mean(queue_lengths[0:40])  # First 10 hours
-    recovery_idx = None
-    for i in range(50, len(queue_lengths)):  # After hour 12
-        if queue_lengths[i] <= baseline_queue * 1.2:
-            recovery_idx = i
-            break
-    if recovery_idx:
-        recovery_time = time_points[recovery_idx]
-        ax2.axvline(recovery_time, color='#84cc16', linestyle='--', linewidth=2, 
-                   label=f'Recovery (~{recovery_time:.1f}hr)')
+    ax2.axvspan(10, 12, alpha=0.2, color='#dc2626')
 
 ax2.set_xlabel('Time (hours)', fontsize=11, fontweight='bold', color='#2e1065')
-ax2.set_ylabel('Patients in Queue', fontsize=11, fontweight='bold', color='#2e1065')
-ax2.legend(loc='upper right', fontsize=10)
+ax2.set_ylabel('Wait Time (minutes)', fontsize=11, fontweight='bold', color='#2e1065')
+ax2_twin.set_ylabel('Wait Time Ratio', fontsize=10, color='#a78bfa')
+ax2.legend(loc='upper left', fontsize=10)
+ax2_twin.legend(loc='upper right', fontsize=9)
 ax2.grid(True, alpha=0.2)
 ax2.set_xlim(0, 24)
 
@@ -485,18 +504,24 @@ time_img = base64.b64encode(buf2.getvalue()).decode('utf-8')
 
 # Generate text report
 report = "═══════════════════════════════════════\\n"
-report += "  M/M/c SIMULATION RESULTS\\n"
+report += "  PRIORITY QUEUE RESULTS\\n"
 report += "═══════════════════════════════════════\\n\\n"
 report += f"Configuration:\\n"
 report += f"  • Servers: ${params.c}\\n"
 report += f"  • Arrival Rate: ${params.lam}/hr\\n"
 report += f"  • Service Rate: ${params.mu}/hr\\n"
+report += f"  • High Priority: ${params.priority_pct}%\\n"
 report += f"  • Utilization: {(${params.lam}/(${params.c}*${params.mu})):.1%}\\n\\n"
-report += f"Performance (n={n_sims}):\\n"
+report += f"Aggregate Performance (n={n_sims}):\\n"
 report += f"  • Mean Wait: {mean_wait:.1f} min\\n"
 report += f"  • Std Dev: {np.std(ensemble_waits):.1f} min\\n"
 report += f"  • Median: {np.median(ensemble_waits):.1f} min\\n"
-report += f"  • 95th %ile: {np.percentile(ensemble_waits, 95):.1f} min\\n"
+report += f"  • 95th %ile: {np.percentile(ensemble_waits, 95):.1f} min\\n\\n"
+
+report += f"By Priority Class:\\n"
+report += f"  • Class 1 (High): {c1_mean:.1f} min\\n"
+report += f"  • Class 2 (Low): {c2_mean:.1f} min\\n"
+report += f"  • Ratio (C2/C1): {(c2_mean/c1_mean if c1_mean > 0 else 1):.1f}×\\n"
 
 if ${params.shockMult} == 1:
     shock_text = "NO (Baseline)"
@@ -517,7 +542,7 @@ if found:
     elif savings < 0:
         rec_text += f"\\n\\n⚠ Add {abs(savings)} server(s)"
 else:
-    rec_text = "⚠ Target unreachable\\nConsider demand management"
+    rec_text = "⚠ Target unreachable\\nConsider capacity expansion"
 
 (report, img, time_img, rec_text)
         `;

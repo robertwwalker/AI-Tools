@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reneging Queue | Queue Lab</title>
+    <title>Reneging Queue | Chaos Lab</title>
     <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,7 +15,7 @@
 
 <nav>
     <div class="container">
-        <a href="index.html" class="logo">Queue Lab</a>
+        <a href="index.html" class="logo">Chaos Lab</a>
         <div class="nav-links">
             <a href="index.html">Home</a>
             <a href="mmc.html">M/M/c Standard</a>
@@ -99,51 +99,33 @@
     </section>
 
     <section class="example-section">
-        <h2>Real-World Applications Across Industries</h2>
+        <h2>Real-World Example: Urban ED with High LWBS</h2>
         
         <div class="example-card">
-            <h3>Healthcare: Urban ED with High LWBS Rate</h3>
+            <h3>Scenario: Metro Community Hospital ED</h3>
             
             <p><strong>Operational Context:</strong></p>
             <ul>
                 <li>Average arrival rate: <strong>18 patients/hour</strong></li>
-                <li>Average service time: <strong>25 minutes</strong> (μ = 2.4/hour)</li>
+                <li>Average service time: <strong>25 minutes</strong> (μ = 2.4 patients/hour)</li>
                 <li>Physicians on duty: <strong>4</strong></li>
                 <li>Current LWBS rate: <strong>8%</strong> (unacceptably high)</li>
                 <li>Estimated median patience: <strong>75 minutes</strong> (1.25 hours)</li>
             </ul>
-            <p><strong>Analysis:</strong> Utilization ρ = 18/(4×2.4) = 1.875 → <span class="warning">SEVERELY OVERLOADED!</span> Reneging prevents infinite queues but represents catastrophic failure.</p>
-        </div>
-        
-        <div class="example-card">
-            <h3>Call Center: Customer Service Abandonment</h3>
             
-            <p><strong>Operational Context:</strong></p>
-            <ul>
-                <li>Incoming call rate: <strong>500 calls/hour</strong></li>
-                <li>Average handle time: <strong>6 minutes</strong> (μ = 10 calls/hour)</li>
-                <li>Agents on duty: <strong>60</strong></li>
-                <li>Current abandonment rate: <strong>12%</strong></li>
-                <li>Estimated median patience: <strong>2 minutes</strong> (0.033 hours)</li>
-            </ul>
-            <p><strong>Analysis:</strong> Utilization ρ = 500/(60×10) = 0.83. Despite reasonable utilization, short patience creates high abandonment. Each abandoned call is lost revenue and customer dissatisfaction.</p>
-        </div>
-        
-        <div class="example-card">
-            <h3>E-commerce: Shopping Cart Abandonment</h3>
+            <p><strong>Analysis:</strong></p>
+            <p>Utilization: ρ = 18/(4×2.4) = 1.875 → <span class="warning">SEVERELY OVERLOADED!</span></p>
+            <p>This system is fundamentally unstable. Without abandonment, queues would grow infinitely. Reneging is the only thing preventing total system collapse, but it represents catastrophic failure.</p>
             
-            <p><strong>Operational Context:</strong></p>
+            <p><strong>Strategic Questions:</strong></p>
             <ul>
-                <li>Users entering checkout: <strong>1200/hour</strong></li>
-                <li>Checkout completion rate: <strong>4 minutes average</strong> (μ = 15/hour)</li>
-                <li>Payment processing capacity: <strong>100 concurrent sessions</strong></li>
-                <li>Current abandonment: <strong>22%</strong> (industry typical: 15-25%)</li>
-                <li>User patience for page loads: <strong>8 seconds</strong></li>
+                <li>How many physicians are needed to reduce LWBS to < 3%?</li>
+                <li>If patience could be extended to 90 minutes (through better communication), what impact on LWBS?</li>
+                <li>What is the revenue impact of 8% LWBS at $500/visit average revenue?</li>
             </ul>
-            <p><strong>Analysis:</strong> Utilization ρ = 1200/(100×15) = 0.80. Slow page loads during high traffic trigger abandonment. At $75 average cart value, 22% abandonment = $19,800/hour revenue loss.</p>
             
             <div class="hint-box">
-                💡 <strong>Try this:</strong> Test these scenarios below. Observe how reneging/abandonment creates natural capacity limits at the cost of lost revenue—whether it's LWBS in healthcare ($500/patient), call abandonment ($25/call), or cart abandonment ($75/cart).
+                💡 <strong>Try this:</strong> Input λ=18, μ=2.4, c=6 (increased from 4), patience=1.25 hours. Observe LWBS reduction. Then test c=8 to see if additional capacity helps further.
             </div>
         </div>
     </section>
@@ -284,8 +266,8 @@
 </div>
 
 <footer>
-    <p><strong>The Queueing Laboratory</strong> • Reneging/Abandonment Model</p>
-    <p>Capacity planning under stochastic demand • All computation runs in your browser using Pyodide</p>
+    <p><strong>Chaos Lab</strong> • Reneging/Abandonment Model</p>
+    <p>All computation runs in your browser using Pyodide</p>
 </footer>
 
 <script>
