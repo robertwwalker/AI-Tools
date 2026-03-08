@@ -32,6 +32,39 @@
         <p class="subtitle">Triage Systems & Variance Redistribution</p>
     </div>
 
+    <aside class="variable-sidebar">
+        <h3>Model Variables</h3>
+        <div class="var-item">
+            <strong>λ (lambda)</strong>
+            <p>Total arrival rate (patients/hour)</p>
+        </div>
+        <div class="var-item">
+            <strong>μ (mu)</strong>
+            <p>Service rate per server (patients/hour/server)</p>
+        </div>
+        <div class="var-item">
+            <strong>c</strong>
+            <p>Number of servers</p>
+        </div>
+        <div class="var-item">
+            <strong>p<sub>high</sub></strong>
+            <p>Proportion of high-priority arrivals (0-100%)</p>
+        </div>
+        <div class="var-item">
+            <strong>ρ<sub>1</sub></strong>
+            <p>High-priority utilization = (λ×p<sub>high</sub>)/(c×μ)</p>
+        </div>
+        <div class="var-item">
+            <strong>ρ<sub>2</sub></strong>
+            <p>Low-priority utilization = (λ×(1-p<sub>high</sub>))/(c×μ)</p>
+        </div>
+        <div class="var-item">
+            <strong>ρ</strong>
+            <p>Total utilization = ρ<sub>1</sub> + ρ<sub>2</sub></p>
+            <p class="var-note">Must be < 1 for stability</p>
+        </div>
+    </aside>
+
     <section class="theory-section">
         <h2>Mathematical Foundation</h2>
         
@@ -203,14 +236,14 @@
         btn.innerHTML = '<span>Processing 60 Realities</span><span class="loading-spinner"></span>';
         
         const params = {
-    lam: parseFloat(document.getElementById('lam').value),
-    mu: parseFloat(document.getElementById('mu').value),
-    c: parseInt(document.getElementById('servers').value),
-    K: parseInt(document.getElementById('capacity').value),
-    shock: document.getElementById('shock_on').checked ? 'True' : 'False', // <--- THE FIX
-    targetWait: parseFloat(document.getElementById('target_wait').value),
-    targetLoss: parseFloat(document.getElementById('target_loss').value)
-};
+            lam: parseFloat(document.getElementById('lam').value),
+            mu: parseFloat(document.getElementById('mu').value),
+            c: parseInt(document.getElementById('servers').value),
+            priority_pct: parseFloat(document.getElementById('priority_pct').value),
+            shock: document.getElementById('shock_on').checked,
+            targetWait: parseFloat(document.getElementById('target_wait').value),
+            targetLoss: parseFloat(document.getElementById('target_loss').value)
+        };
 
         if (params.lam <= 0 || params.mu <= 0 || params.c <= 0) {
             alert('Please ensure all parameters are positive values.');
@@ -269,7 +302,7 @@ n_sims = 60
 ensemble_waits = []
 
 for _ in range(n_sims):
-    w, _, _ = simulate_priority(${params.lam}, ${params.mu}, ${params.c}, ${params.priority_pct}, ${params.shock})
+    w, _, _ = simulate_priority(${params.lam}, ${params.mu}, ${params.c}, ${params.priority_pct}, ${params.shock ? 'True' : 'False'})
     ensemble_waits.append(w)
 
 rec_c = ${params.c}
@@ -333,7 +366,7 @@ report += f"  • Std Dev: {np.std(ensemble_waits):.1f} min\\n"
 report += f"  • Median: {np.median(ensemble_waits):.1f} min\\n"
 report += f"  • 95th %ile: {np.percentile(ensemble_waits, 95):.1f} min\\n"
 
-shock_text = "YES (5× surge)" if ${params.shock} else "NO"
+shock_text = "YES (5× surge)" if ${params.shock ? 'True' : 'False'} else "NO"
 report += f"\\nShock: {shock_text}\\n"
 report += f"\\n⚠ Note: This is aggregate wait.\\n"
 report += f"High-priority patients wait much less,\\n"

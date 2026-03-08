@@ -32,6 +32,35 @@
         <p class="subtitle">The Foundation of Multi-Server Queueing Theory</p>
     </div>
 
+    <aside class="variable-sidebar">
+        <h3>Model Variables</h3>
+        <div class="var-item">
+            <strong>λ (lambda)</strong>
+            <p>Arrival rate (patients/hour)</p>
+        </div>
+        <div class="var-item">
+            <strong>μ (mu)</strong>
+            <p>Service rate per server (patients/hour/server)</p>
+        </div>
+        <div class="var-item">
+            <strong>c</strong>
+            <p>Number of servers (doctors, nurses, etc.)</p>
+        </div>
+        <div class="var-item">
+            <strong>ρ (rho)</strong>
+            <p>Utilization = λ/(c×μ)</p>
+            <p class="var-note">Must be < 1 for stability</p>
+        </div>
+        <div class="var-item">
+            <strong>W<sub>q</sub></strong>
+            <p>Average wait time in queue</p>
+        </div>
+        <div class="var-item">
+            <strong>L<sub>q</sub></strong>
+            <p>Average queue length</p>
+        </div>
+    </aside>
+
     <section class="theory-section">
         <h2>Mathematical Foundation</h2>
         
@@ -183,6 +212,7 @@
     <p>All computation runs in your browser using Pyodide</p>
 </footer>
 
+<script src="simulation.js"></script>
 <script>
     async function init() {
         pyodide = await loadPyodide();
@@ -197,14 +227,15 @@
         btn.disabled = true;
         btn.innerHTML = '<span>Processing 60 Realities</span><span class="loading-spinner"></span>';
         
-const params = {
-    lam: parseFloat(document.getElementById('lam').value),
-    mu: parseFloat(document.getElementById('mu').value),
-    c: parseInt(document.getElementById('servers').value),
-    shock: document.getElementById('shock_on').checked ? 'True' : 'False', // <--- FIX HERE
-    targetWait: parseFloat(document.getElementById('target_wait').value),
-    targetLoss: parseFloat(document.getElementById('target_loss').value)
-};
+        const params = {
+            lam: parseFloat(document.getElementById('lam').value),
+            mu: parseFloat(document.getElementById('mu').value),
+            c: parseInt(document.getElementById('servers').value),
+            shock: document.getElementById('shock_on').checked,
+            targetWait: parseFloat(document.getElementById('target_wait').value),
+            targetLoss: parseFloat(document.getElementById('target_loss').value)
+        };
+
         if (params.lam <= 0 || params.mu <= 0 || params.c <= 0) {
             alert('Please ensure all parameters are positive values.');
             btn.disabled = false;
@@ -258,7 +289,7 @@ n_sims = 60
 ensemble_waits = []
 
 for _ in range(n_sims):
-    w, _, _ = simulate_mmc(${params.lam}, ${params.mu}, ${params.c}, ${params.shock})
+    w, _, _ = simulate_mmc(${params.lam}, ${params.mu}, ${params.c}, ${params.shock ? 'True' : 'False'})
     ensemble_waits.append(w)
 
 rec_c = ${params.c}
@@ -321,7 +352,7 @@ report += f"  • Std Dev: {np.std(ensemble_waits):.1f} min\\n"
 report += f"  • Median: {np.median(ensemble_waits):.1f} min\\n"
 report += f"  • 95th %ile: {np.percentile(ensemble_waits, 95):.1f} min\\n"
 
-shock_text = "YES (5× surge)" if ${params.shock} else "NO"
+shock_text = "YES (5× surge)" if ${params.shock ? 'True' : 'False'} else "NO"
 report += f"\\nShock: {shock_text}\\n"
 
 if found:

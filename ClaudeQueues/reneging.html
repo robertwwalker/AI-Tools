@@ -32,6 +32,36 @@
         <p class="subtitle">Modeling Patient Patience & LWBS Behavior</p>
     </div>
 
+    <aside class="variable-sidebar">
+        <h3>Model Variables</h3>
+        <div class="var-item">
+            <strong>λ (lambda)</strong>
+            <p>Arrival rate (patients/hour)</p>
+        </div>
+        <div class="var-item">
+            <strong>μ (mu)</strong>
+            <p>Service rate per server (patients/hour/server)</p>
+        </div>
+        <div class="var-item">
+            <strong>c</strong>
+            <p>Number of servers</p>
+        </div>
+        <div class="var-item">
+            <strong>T</strong>
+            <p>Maximum patience threshold (hours)</p>
+            <p class="var-note">Patients abandon if wait > T</p>
+        </div>
+        <div class="var-item">
+            <strong>LWBS Rate</strong>
+            <p>Left Without Being Seen percentage</p>
+        </div>
+        <div class="var-item">
+            <strong>ρ (rho)</strong>
+            <p>Utilization = λ/(c×μ)</p>
+            <p class="var-note">Can be ≥ 1 (reneging limits queue)</p>
+        </div>
+    </aside>
+
     <section class="theory-section">
         <h2>Mathematical Foundation</h2>
         
@@ -230,14 +260,14 @@
         btn.innerHTML = '<span>Processing 60 Realities</span><span class="loading-spinner"></span>';
         
         const params = {
-    lam: parseFloat(document.getElementById('lam').value),
-    mu: parseFloat(document.getElementById('mu').value),
-    c: parseInt(document.getElementById('servers').value),
-    K: parseInt(document.getElementById('capacity').value),
-    shock: document.getElementById('shock_on').checked ? 'True' : 'False', // <--- THE FIX
-    targetWait: parseFloat(document.getElementById('target_wait').value),
-    targetLoss: parseFloat(document.getElementById('target_loss').value)
-};
+            lam: parseFloat(document.getElementById('lam').value),
+            mu: parseFloat(document.getElementById('mu').value),
+            c: parseInt(document.getElementById('servers').value),
+            patience: parseFloat(document.getElementById('patience').value),
+            shock: document.getElementById('shock_on').checked,
+            targetWait: parseFloat(document.getElementById('target_wait').value),
+            targetLoss: parseFloat(document.getElementById('target_loss').value)
+        };
 
         if (params.lam <= 0 || params.mu <= 0 || params.c <= 0 || params.patience <= 0) {
             alert('Please ensure all parameters are positive values.');
@@ -293,7 +323,7 @@ ensemble_waits = []
 ensemble_lwbs = []
 
 for _ in range(n_sims):
-    w, l, _ = simulate_reneging(${params.lam}, ${params.mu}, ${params.c}, ${params.patience}, ${params.shock})
+    w, l, _ = simulate_reneging(${params.lam}, ${params.mu}, ${params.c}, ${params.patience}, ${params.shock ? 'True' : 'False'})
     ensemble_waits.append(w)
     ensemble_lwbs.append(l)
 
@@ -369,7 +399,7 @@ else:
     report += "\\n"
 report += f"  • 95th %ile: {np.percentile(ensemble_waits, 95):.1f} min\\n"
 
-shock_text = "YES (5× surge)" if ${params.shock} else "NO"
+shock_text = "YES (5× surge)" if ${params.shock ? 'True' : 'False'} else "NO"
 report += f"\\nShock: {shock_text}\\n"
 
 # Revenue impact calculation
