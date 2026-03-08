@@ -183,7 +183,6 @@
     <p>All computation runs in your browser using Pyodide</p>
 </footer>
 
-<script src="simulation.js"></script>
 <script>
     async function init() {
         pyodide = await loadPyodide();
@@ -198,15 +197,14 @@
         btn.disabled = true;
         btn.innerHTML = '<span>Processing 60 Realities</span><span class="loading-spinner"></span>';
         
-        const params = {
-            lam: parseFloat(document.getElementById('lam').value),
-            mu: parseFloat(document.getElementById('mu').value),
-            c: parseInt(document.getElementById('servers').value),
-            shock: document.getElementById('shock_on').checked,
-            targetWait: parseFloat(document.getElementById('target_wait').value),
-            targetLoss: parseFloat(document.getElementById('target_loss').value)
-        };
-
+const params = {
+    lam: parseFloat(document.getElementById('lam').value),
+    mu: parseFloat(document.getElementById('mu').value),
+    c: parseInt(document.getElementById('servers').value),
+    shock: document.getElementById('shock_on').checked ? 'True' : 'False', // <--- FIX HERE
+    targetWait: parseFloat(document.getElementById('target_wait').value),
+    targetLoss: parseFloat(document.getElementById('target_loss').value)
+};
         if (params.lam <= 0 || params.mu <= 0 || params.c <= 0) {
             alert('Please ensure all parameters are positive values.');
             btn.disabled = false;

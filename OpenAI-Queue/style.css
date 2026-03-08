@@ -1,0 +1,26 @@
+body {
+font-family: Arial;
+max-width: 900px;
+margin: auto;
+}
+
+.controls {
+margin-bottom: 20px;
+}
+
+label {
+display: block;
+margin: 10px 0;
+}
+
+#queue {
+display: flex;
+gap: 6px;
+margin-top: 20px;
+}
+
+.job {
+width: 18px;
+height: 18px;
+background: steelblue;
+}

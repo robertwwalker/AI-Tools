@@ -230,14 +230,14 @@
         btn.innerHTML = '<span>Processing 60 Realities</span><span class="loading-spinner"></span>';
         
         const params = {
-            lam: parseFloat(document.getElementById('lam').value),
-            mu: parseFloat(document.getElementById('mu').value),
-            c: parseInt(document.getElementById('servers').value),
-            patience: parseFloat(document.getElementById('patience').value),
-            shock: document.getElementById('shock_on').checked,
-            targetWait: parseFloat(document.getElementById('target_wait').value),
-            targetLoss: parseFloat(document.getElementById('target_loss').value)
-        };
+    lam: parseFloat(document.getElementById('lam').value),
+    mu: parseFloat(document.getElementById('mu').value),
+    c: parseInt(document.getElementById('servers').value),
+    K: parseInt(document.getElementById('capacity').value),
+    shock: document.getElementById('shock_on').checked ? 'True' : 'False', // <--- THE FIX
+    targetWait: parseFloat(document.getElementById('target_wait').value),
+    targetLoss: parseFloat(document.getElementById('target_loss').value)
+};
 
         if (params.lam <= 0 || params.mu <= 0 || params.c <= 0 || params.patience <= 0) {
             alert('Please ensure all parameters are positive values.');
