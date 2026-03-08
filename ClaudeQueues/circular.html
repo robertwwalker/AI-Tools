@@ -8,7 +8,7 @@
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=IBM+Plex+Mono:wght@400;600&family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -29,7 +29,7 @@
 <div class="container">
     <div class="page-header">
         <h1>M/M/c/K Finite Capacity Queue</h1>
-        <p class="subtitle">Modeling Resource-Constrained Systems with Blocking</p>
+        <p class="subtitle">Blocking Dynamics, Capacity Limits & Surge Impact Analysis</p>
     </div>
 
     <aside class="variable-sidebar">
@@ -119,6 +119,7 @@
 
     <section class="lab-section">
         <h2>Interactive Simulation Laboratory</h2>
+        <p>Simulate finite-capacity systems with blocking dynamics. Test surge scenarios to observe blocking cascades, system saturation, and recovery patterns. Visualizations include occupancy tracking and blocking event analysis over time.</p>
         
         <div class="lab-ui">
             <div class="control-grid">
@@ -154,9 +155,27 @@
                 </div>
             </div>
 
-            <div class="shock-bar">
-                <input type="checkbox" id="shock_on">
-                <label for="shock_on">🚨 SIMULATE SYSTEM SHOCK (5× Arrivals for 2 Hours at Hour 10)</label>
+            <div class="shock-section">
+                <strong>🚨 System Shock Simulation</strong>
+                <p class="shock-description">Test system resilience with surge scenarios (elevated arrivals from hour 10-12)</p>
+                <div class="shock-options">
+                    <label class="shock-radio">
+                        <input type="radio" name="shock" value="none" checked>
+                        <span>No Shock (Baseline)</span>
+                    </label>
+                    <label class="shock-radio">
+                        <input type="radio" name="shock" value="2x">
+                        <span>2× Surge (Moderate)</span>
+                    </label>
+                    <label class="shock-radio">
+                        <input type="radio" name="shock" value="3x">
+                        <span>3× Surge (High)</span>
+                    </label>
+                    <label class="shock-radio">
+                        <input type="radio" name="shock" value="5x">
+                        <span>5× Surge (Extreme)</span>
+                    </label>
+                </div>
             </div>
 
             <button id="runBtn" onclick="runSimulation()" disabled>
@@ -170,7 +189,15 @@
                         <div id="rec-box"></div>
                     </div>
                     <div class="img-wrap">
-                        <img id="plot-img" src="" alt="Simulation Results" />
+                        <img id="plot-img" src="" alt="Wait Time Distribution" />
+                    </div>
+                </div>
+                
+                <div class="time-path-section">
+                    <h3>System Dynamics & Recovery Analysis</h3>
+                    <p>Visualizes queue buildup, blocking events, and system recovery over 24 hours.</p>
+                    <div class="img-wrap">
+                        <img id="time-plot-img" src="" alt="Time Path Analysis" />
                     </div>
                 </div>
             </div>
@@ -226,12 +253,19 @@
         btn.disabled = true;
         btn.innerHTML = '<span>Processing 60 Realities</span><span class="loading-spinner"></span>';
         
+        const shockRadio = document.querySelector('input[name="shock"]:checked');
+        const shockValue = shockRadio ? shockRadio.value : 'none';
+        let shockMultiplier = 1;
+        if (shockValue === '2x') shockMultiplier = 2;
+        else if (shockValue === '3x') shockMultiplier = 3;
+        else if (shockValue === '5x') shockMultiplier = 5;
+        
         const params = {
             lam: parseFloat(document.getElementById('lam').value),
             mu: parseFloat(document.getElementById('mu').value),
             c: parseInt(document.getElementById('servers').value),
             K: parseInt(document.getElementById('capacity').value),
-            shock: document.getElementById('shock_on').checked,
+            shockMult: shockMultiplier,
             targetWait: parseFloat(document.getElementById('target_wait').value),
             targetLoss: parseFloat(document.getElementById('target_loss').value)
         };
@@ -262,11 +296,79 @@ import numpy as np
 import matplotlib.pyplot as plt
 import io, base64
 
-def simulate_circular(lam, mu, c, K, is_shock):
+def simulate_circular_with_tracking(lam, mu, c, K, shock_mult):
+    """Simulate with time tracking for blocking visualization"""
     t, dur = 0, 24
     arrs = []
     while t < dur:
-        l = lam * 5 if (is_shock and 10 <= t <= 12) else lam
+        l = lam * shock_mult if (shock_mult > 1 and 10 <= t <= 12) else lam
+        t += np.random.exponential(1/l)
+        if t < dur:
+            arrs.append(t)
+    
+    free = [0.0] * c
+    waits = []
+    lost = 0
+    in_system = []
+    
+    # Track system state over time
+    time_points = np.linspace(0, 24, 100)
+    blocking_events = []
+    arrival_rates = []
+    occupancy_levels = []
+    
+    for tp in time_points:
+        # Arrival rate at this time
+        rate = lam * shock_mult if (shock_mult > 1 and 10 <= tp <= 12) else lam
+        arrival_rates.append(rate)
+        
+        # Count blocking events in window around this time
+        window = 0.5  # 30 minute window
+        blocks_in_window = 0
+        arrivals_in_window = 0
+        for arr in arrs:
+            if tp - window/2 <= arr <= tp + window/2:
+                arrivals_in_window += 1
+        
+        # Estimate blocking rate
+        if arrivals_in_window > 0:
+            # Simplified: estimate based on system load
+            temp_in_sys = sum(1 for arr in arrs if arr <= tp and arr + 1/mu >= tp)
+            if temp_in_sys >= K * 0.9:
+                blocks_in_window = int(arrivals_in_window * 0.3)
+        blocking_events.append(blocks_in_window)
+        
+        # Occupancy level
+        occ = min(sum(1 for arr in arrs if arr <= tp and arr + 1/mu >= tp), K)
+        occupancy_levels.append(occ)
+    
+    for a_t in arrs:
+        in_system = [(arr, comp) for arr, comp in in_system if comp > a_t]
+        
+        if len(in_system) >= K:
+            lost += 1
+            continue
+        
+        free.sort()
+        start = max(a_t, free[0])
+        w = (start - a_t) * 60
+        
+        service_time = np.random.exponential(1/mu)
+        completion_time = start + service_time
+        free[0] = completion_time
+        waits.append(w)
+        in_system.append((a_t, completion_time))
+    
+    avg_w = np.mean(waits) if waits else 0
+    loss_pct = (lost / len(arrs) * 100) if arrs else 0
+    return avg_w, loss_pct, time_points, blocking_events, arrival_rates, occupancy_levels
+
+def simulate_circular(lam, mu, c, K, shock_mult):
+    """Simple version for ensemble"""
+    t, dur = 0, 24
+    arrs = []
+    while t < dur:
+        l = lam * shock_mult if (shock_mult > 1 and 10 <= t <= 12) else lam
         t += np.random.exponential(1/l)
         if t < dur:
             arrs.append(t)
@@ -295,14 +397,19 @@ def simulate_circular(lam, mu, c, K, is_shock):
     
     avg_w = np.mean(waits) if waits else 0
     loss_pct = (lost / len(arrs) * 100) if arrs else 0
-    return avg_w, loss_pct, waits
+    return avg_w, loss_pct
+
+# Run one detailed simulation for time path
+mean_wait_detail, loss_detail, time_points, blocking_events, arrival_rates, occupancy = simulate_circular_with_tracking(
+    ${params.lam}, ${params.mu}, ${params.c}, ${params.K}, ${params.shockMult}
+)
 
 n_sims = 60
 ensemble_waits = []
 ensemble_loss = []
 
 for _ in range(n_sims):
-    w, l, _ = simulate_circular(${params.lam}, ${params.mu}, ${params.c}, ${params.K}, ${params.shock ? 'True' : 'False'})
+    w, l = simulate_circular(${params.lam}, ${params.mu}, ${params.c}, ${params.K}, ${params.shockMult})
     ensemble_waits.append(w)
     ensemble_loss.append(l)
 
@@ -312,7 +419,7 @@ found = False
 for test_K in range(${params.c}, ${params.c} + 20):
     test_ws, test_ls = [], []
     for _ in range(15):
-        w, l, _ = simulate_circular(${params.lam}, ${params.mu}, ${params.c}, test_K, False)
+        w, l = simulate_circular(${params.lam}, ${params.mu}, ${params.c}, test_K, 1)
         test_ws.append(w)
         test_ls.append(l)
     
@@ -321,6 +428,7 @@ for test_K in range(${params.c}, ${params.c} + 20):
         found = True
         break
 
+# Generate wait time distribution plot
 plt.style.use('default')
 fig, ax = plt.subplots(figsize=(11, 6))
 fig.patch.set_facecolor('#f8fafb')
@@ -339,7 +447,8 @@ if len(patches) > 0:
 ax.axvline(mean_wait, color='#84cc16', lw=4, label=f'Mean: {mean_wait:.1f} min', linestyle='-', alpha=0.9)
 ax.axvline(${params.targetWait}, color='#6366f1', ls='--', lw=3, label=f'Target: ${params.targetWait} min', alpha=0.8)
 
-ax.set_title(f'M/M/c/K Queue: Wait Time Distribution (n={n_sims})\\nc={${params.c}}, K={${params.K}} | Blocking: {mean_loss:.1f}%', 
+shock_label = "No Shock" if ${params.shockMult} == 1 else f"${params.shockMult}× Shock"
+ax.set_title(f'M/M/c/K Queue: Wait Time Distribution (n={n_sims})\\nc={${params.c}}, K={${params.K}} | Blocking: {mean_loss:.1f}% | {shock_label}', 
              fontsize=14, fontweight='bold', color='#1a0d2e', pad=20)
 ax.set_xlabel('Average Wait Time (Minutes)', fontsize=12, fontweight='bold', color='#2e1065')
 ax.set_ylabel('Frequency', fontsize=12, fontweight='bold', color='#2e1065')
@@ -352,6 +461,65 @@ plt.savefig(buf, format='png', dpi=150, bbox_inches='tight')
 plt.close()
 img = base64.b64encode(buf.getvalue()).decode('utf-8')
 
+# Generate time path visualization
+fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 8))
+fig.patch.set_facecolor('#f8fafb')
+
+# Plot 1: Arrival Rate Over Time
+ax1.set_facecolor('#ffffff')
+ax1.plot(time_points, arrival_rates, color='#4c1d95', linewidth=3, label='Arrival Rate')
+ax1.axhline(${params.lam}, color='#84cc16', linestyle='--', linewidth=2, alpha=0.7, label='Baseline Rate')
+
+if ${params.shockMult} > 1:
+    ax1.axvspan(10, 12, alpha=0.2, color='#dc2626', label='Shock Period')
+
+ax1.set_ylabel('Arrival Rate (patients/hr)', fontsize=11, fontweight='bold', color='#2e1065')
+ax1.set_title('M/M/c/K System Dynamics Over 24 Hours', fontsize=14, fontweight='bold', color='#1a0d2e', pad=15)
+ax1.legend(loc='upper right', fontsize=10)
+ax1.grid(True, alpha=0.2)
+ax1.set_xlim(0, 24)
+
+# Plot 2: Occupancy and Blocking Over Time
+ax2_twin = ax2.twinx()
+ax2.set_facecolor('#ffffff')
+
+# Occupancy level
+ax2.fill_between(time_points, occupancy, alpha=0.3, color='#a78bfa', label='Occupancy')
+ax2.plot(time_points, occupancy, color='#4c1d95', linewidth=3, label='System Occupancy')
+ax2.axhline(${params.K}, color='#dc2626', linestyle='--', linewidth=2, alpha=0.7, label='Capacity Limit (K)')
+
+# Blocking events on secondary axis
+ax2_twin.bar(time_points, blocking_events, width=0.2, alpha=0.5, color='#dc2626', label='Blocking Events')
+
+if ${params.shockMult} > 1:
+    ax2.axvspan(10, 12, alpha=0.2, color='#dc2626')
+    # Mark recovery point
+    baseline_occ = np.mean(occupancy[0:40])
+    recovery_idx = None
+    for i in range(50, len(occupancy)):
+        if occupancy[i] <= baseline_occ * 1.2:
+            recovery_idx = i
+            break
+    if recovery_idx:
+        recovery_time = time_points[recovery_idx]
+        ax2.axvline(recovery_time, color='#84cc16', linestyle='--', linewidth=2, 
+                   label=f'Recovery (~{recovery_time:.1f}hr)')
+
+ax2.set_xlabel('Time (hours)', fontsize=11, fontweight='bold', color='#2e1065')
+ax2.set_ylabel('System Occupancy (patients)', fontsize=11, fontweight='bold', color='#2e1065')
+ax2_twin.set_ylabel('Blocking Events', fontsize=10, color='#dc2626')
+ax2.legend(loc='upper left', fontsize=10)
+ax2_twin.legend(loc='upper right', fontsize=9)
+ax2.grid(True, alpha=0.2)
+ax2.set_xlim(0, 24)
+
+plt.tight_layout()
+buf2 = io.BytesIO()
+plt.savefig(buf2, format='png', dpi=150, bbox_inches='tight')
+plt.close()
+time_img = base64.b64encode(buf2.getvalue()).decode('utf-8')
+
+# Generate text report
 report = "═══════════════════════════════════════\\n"
 report += "  M/M/c/K SIMULATION RESULTS\\n"
 report += "═══════════════════════════════════════\\n\\n"
@@ -370,7 +538,15 @@ else:
     report += "\\n"
 report += f"  • 95th %ile: {np.percentile(ensemble_waits, 95):.1f} min\\n"
 
-shock_text = "YES (5× surge)" if ${params.shock ? 'True' : 'False'} else "NO"
+if ${params.shockMult} == 1:
+    shock_text = "NO (Baseline)"
+elif ${params.shockMult} == 2:
+    shock_text = "YES (2× surge, hrs 10-12)"
+elif ${params.shockMult} == 3:
+    shock_text = "YES (3× surge, hrs 10-12)"
+else:
+    shock_text = "YES (5× surge, hrs 10-12)"
+
 report += f"\\nShock: {shock_text}\\n"
 
 if found:
@@ -383,13 +559,14 @@ if found:
 else:
     rec_text = "⚠ Target unreachable\\nConsider capacity expansion\\nor demand management"
 
-(report, img, rec_text)
+(report, img, time_img, rec_text)
         `;
 
-        const [report, img, rec] = await pyodide.runPythonAsync(code);
+        const [report, img, timeImg, rec] = await pyodide.runPythonAsync(code);
         document.getElementById('text-log').innerText = report;
         document.getElementById('rec-box').innerText = rec;
         document.getElementById('plot-img').src = "data:image/png;base64," + img;
+        document.getElementById('time-plot-img').src = "data:image/png;base64," + timeImg;
         document.getElementById('output-area').style.display = 'block';
     }
 </script>

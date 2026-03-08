@@ -39,7 +39,7 @@
 }
 
 body { 
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, sans-serif;
     background: linear-gradient(180deg, var(--bg-primary) 0%, #f0fdf4 100%);
     color: var(--text-primary);
     line-height: 1.75;
@@ -70,7 +70,7 @@ nav .container {
 }
 
 nav .logo {
-    font-family: 'EB Garamond', Georgia, serif;
+    font-family: 'Playfair Display', Georgia, serif;
     font-size: 1.8rem;
     font-weight: 900;
     color: var(--lime-bright);
@@ -117,7 +117,7 @@ nav a.active {
 }
 
 .page-header h1 {
-    font-family: 'EB Garamond', Georgia, serif;
+    font-family: 'Playfair Display', Georgia, serif;
     font-size: 3.5rem;
     color: var(--purple-900);
     margin-bottom: 15px;
@@ -145,7 +145,7 @@ nav a.active {
 }
 
 .variable-sidebar h3 {
-    font-family: 'EB Garamond', Georgia, serif;
+    font-family: 'Playfair Display', Georgia, serif;
     color: var(--purple-800);
     font-size: 1.4rem;
     margin: 0 0 20px 0;
@@ -173,7 +173,7 @@ nav a.active {
     display: block;
     color: var(--purple-700);
     font-size: 1.1rem;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     margin-bottom: 5px;
 }
 
@@ -202,7 +202,7 @@ section {
 }
 
 section h2 {
-    font-family: 'EB Garamond', Georgia, serif;
+    font-family: 'Playfair Display', Georgia, serif;
     color: var(--purple-800);
     font-size: 2.5rem;
     font-weight: 900;
@@ -346,7 +346,7 @@ section li {
     margin-bottom: 10px;
     color: var(--purple-700);
     font-size: 0.95rem;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
 }
 
 .control-group input {
@@ -357,7 +357,7 @@ section li {
     font-size: 1.05rem;
     background: var(--bg-secondary);
     transition: all 0.3s ease;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
 }
 
 .control-group input:focus {
@@ -380,94 +380,7 @@ section li {
     color: var(--purple-800);
     font-size: 1.2rem;
     margin-bottom: 15px;
-    font-family: 'EB Garamond', Georgia, serif;
-}
-
-.shock-section {
-    background: linear-gradient(135deg, #fff7ed 0%, #fef2f2 100%);
-    padding: 30px;
-    border-radius: 12px;
-    border: 2px solid #f97316;
-    margin-bottom: 30px;
-    box-shadow: var(--shadow-sm);
-}
-
-.shock-section strong {
-    display: block;
-    color: #ea580c;
-    font-size: 1.3rem;
-    margin-bottom: 10px;
-    font-family: 'EB Garamond', Georgia, serif;
-}
-
-.shock-description {
-    color: var(--text-secondary);
-    font-size: 0.95rem;
-    margin-bottom: 20px;
-}
-
-.shock-options {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 15px;
-}
-
-.shock-radio {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 18px;
-    background: var(--bg-secondary);
-    border: 2px solid var(--border-color);
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-weight: 600;
-    color: var(--text-primary);
-}
-
-.shock-radio:hover {
-    border-color: #f97316;
-    background: #fff7ed;
-}
-
-.shock-radio input[type="radio"] {
-    width: 20px;
-    height: 20px;
-    cursor: pointer;
-    accent-color: #f97316;
-}
-
-.shock-radio input[type="radio"]:checked + span {
-    color: #ea580c;
-}
-
-.shock-radio:has(input:checked) {
-    border-color: #ea580c;
-    background: linear-gradient(135deg, #fff7ed 0%, #fef2f2 100%);
-    box-shadow: 0 2px 8px rgba(234, 88, 12, 0.2);
-}
-
-.time-path-section {
-    margin-top: 50px;
-    background: var(--bg-secondary);
-    padding: 40px;
-    border-radius: 16px;
-    box-shadow: var(--shadow-md);
-    border-left: 6px solid var(--lime-500);
-}
-
-.time-path-section h3 {
-    font-family: 'EB Garamond', Georgia, serif;
-    color: var(--purple-800);
-    font-size: 2rem;
-    margin-bottom: 15px;
-}
-
-.time-path-section p {
-    color: var(--text-secondary);
-    margin-bottom: 25px;
-    font-size: 1.05rem;
+    font-family: 'Playfair Display', Georgia, serif;
 }
 
 .shock-bar {
@@ -502,7 +415,7 @@ button#runBtn {
     cursor: pointer;
     transition: all 0.4s ease;
     box-shadow: 0 8px 25px rgba(76, 29, 149, 0.35);
-    font-family: 'Inter', sans-serif;
+    font-family: 'Source Sans Pro', sans-serif;
 }
 
 button#runBtn:hover {
@@ -529,7 +442,7 @@ button#runBtn:disabled {
     color: var(--lime-300);
     padding: 30px;
     border-radius: 12px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 1rem;
     line-height: 1.7;
     box-shadow: var(--shadow-lg);
@@ -548,7 +461,7 @@ button#runBtn:disabled {
     text-align: center;
     font-size: 1.3rem;
     box-shadow: var(--shadow-md);
-    font-family: 'EB Garamond', Georgia, serif;
+    font-family: 'Playfair Display', Georgia, serif;
 }
 
 .img-wrap {

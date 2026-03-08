@@ -8,7 +8,7 @@
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=IBM+Plex+Mono:wght@400;600&family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -29,7 +29,7 @@
 <div class="container">
     <div class="page-header">
         <h1>M/M/c Standard Queue</h1>
-        <p class="subtitle">The Foundation of Multi-Server Queueing Theory</p>
+        <p class="subtitle">Multi-Server Queueing with Surge Analysis & Recovery Dynamics</p>
     </div>
 
     <aside class="variable-sidebar">
@@ -124,6 +124,7 @@
 
     <section class="lab-section">
         <h2>Interactive Simulation Laboratory</h2>
+        <p>Run ensemble simulations (60 parallel realities) to analyze queue behavior under various conditions. Test multiple shock scenarios (2×, 3×, 5× surge arrivals) and visualize system dynamics including queue evolution and recovery time.</p>
         
         <div class="lab-ui">
             <div class="control-grid">
@@ -155,9 +156,24 @@
                 </div>
             </div>
 
-            <div class="shock-bar">
-                <input type="checkbox" id="shock_on">
-                <label for="shock_on">🚨 SIMULATE SYSTEM SHOCK (5× Arrivals for 2 Hours at Hour 10)</label>
+            <div class="shock-section">
+                <strong>🚨 System Shock Simulation</strong>
+                <p class="shock-description">Test system resilience with surge scenarios (elevated arrivals from hour 10-12)</p>
+                <div class="shock-options">
+                    <label class="shock-radio">
+                        <input type="radio" name="shock" value="none" checked>
+                        <span>No Shock (Baseline)</span>
+                    </label>
+                    <label class="shock-radio">
+                        <input type="radio" name="shock" value="2x">
+                        <span>2× Surge (Moderate)</span>
+                    </label>
+                    <label class="shock-radio">
+                        <input type="radio" name="shock" value="3x">
+                        <input type="radio" name="shock" value="5x">
+                        <span>5× Surge (Extreme)</span>
+                    </label>
+                </div>
             </div>
 
             <button id="runBtn" onclick="runSimulation()" disabled>
@@ -171,7 +187,15 @@
                         <div id="rec-box"></div>
                     </div>
                     <div class="img-wrap">
-                        <img id="plot-img" src="" alt="Simulation Results" />
+                        <img id="plot-img" src="" alt="Wait Time Distribution" />
+                    </div>
+                </div>
+                
+                <div class="time-path-section">
+                    <h3>System Dynamics & Recovery Analysis</h3>
+                    <p>This visualization shows how the system evolves over 24 hours, including queue buildup during shock and recovery time afterward.</p>
+                    <div class="img-wrap">
+                        <img id="time-plot-img" src="" alt="Time Path Analysis" />
                     </div>
                 </div>
             </div>
@@ -227,11 +251,18 @@
         btn.disabled = true;
         btn.innerHTML = '<span>Processing 60 Realities</span><span class="loading-spinner"></span>';
         
+        const shockRadio = document.querySelector('input[name="shock"]:checked');
+        const shockValue = shockRadio ? shockRadio.value : 'none';
+        let shockMultiplier = 1;
+        if (shockValue === '2x') shockMultiplier = 2;
+        else if (shockValue === '3x') shockMultiplier = 3;
+        else if (shockValue === '5x') shockMultiplier = 5;
+        
         const params = {
             lam: parseFloat(document.getElementById('lam').value),
             mu: parseFloat(document.getElementById('mu').value),
             c: parseInt(document.getElementById('servers').value),
-            shock: document.getElementById('shock_on').checked,
+            shockMult: shockMultiplier,
             targetWait: parseFloat(document.getElementById('target_wait').value),
             targetLoss: parseFloat(document.getElementById('target_loss').value)
         };
@@ -264,11 +295,48 @@ import numpy as np
 import matplotlib.pyplot as plt
 import io, base64
 
-def simulate_mmc(lam, mu, c, is_shock):
+def simulate_mmc_with_tracking(lam, mu, c, shock_mult):
+    """Simulate with time tracking for visualization"""
     t, dur = 0, 24
     arrs = []
     while t < dur:
-        l = lam * 5 if (is_shock and 10 <= t <= 12) else lam
+        l = lam * shock_mult if (shock_mult > 1 and 10 <= t <= 12) else lam
+        t += np.random.exponential(1/l)
+        if t < dur:
+            arrs.append(t)
+    
+    free = [0.0] * c
+    waits = []
+    
+    # Track system state over time
+    time_points = np.linspace(0, 24, 100)
+    queue_lengths = []
+    arrival_rates = []
+    
+    for tp in time_points:
+        # Count how many in queue at this time point
+        in_queue = sum(1 for arr_t in arrs if arr_t <= tp and max(arr_t, min([f for f in free if f <= tp] or [0])) > tp)
+        queue_lengths.append(in_queue)
+        
+        # Arrival rate at this time
+        rate = lam * shock_mult if (shock_mult > 1 and 10 <= tp <= 12) else lam
+        arrival_rates.append(rate)
+    
+    for a_t in arrs:
+        free.sort()
+        start = max(a_t, free[0])
+        w = (start - a_t) * 60
+        free[0] = start + np.random.exponential(1/mu)
+        waits.append(w)
+    
+    return np.mean(waits) if waits else 0, waits, time_points, queue_lengths, arrival_rates
+
+def simulate_mmc(lam, mu, c, shock_mult):
+    """Simple version for ensemble"""
+    t, dur = 0, 24
+    arrs = []
+    while t < dur:
+        l = lam * shock_mult if (shock_mult > 1 and 10 <= t <= 12) else lam
         t += np.random.exponential(1/l)
         if t < dur:
             arrs.append(t)
@@ -283,13 +351,18 @@ def simulate_mmc(lam, mu, c, is_shock):
         free[0] = start + np.random.exponential(1/mu)
         waits.append(w)
     
-    return np.mean(waits) if waits else 0, 0, waits
+    return np.mean(waits) if waits else 0
+
+# Run one detailed simulation for time path
+mean_wait_detail, waits_detail, time_points, queue_lengths, arrival_rates = simulate_mmc_with_tracking(
+    ${params.lam}, ${params.mu}, ${params.c}, ${params.shockMult}
+)
 
 n_sims = 60
 ensemble_waits = []
 
 for _ in range(n_sims):
-    w, _, _ = simulate_mmc(${params.lam}, ${params.mu}, ${params.c}, ${params.shock ? 'True' : 'False'})
+    w = simulate_mmc(${params.lam}, ${params.mu}, ${params.c}, ${params.shockMult})
     ensemble_waits.append(w)
 
 rec_c = ${params.c}
@@ -301,7 +374,7 @@ for test_c in range(1, 21):
     
     test_ws = []
     for _ in range(15):
-        w, _, _ = simulate_mmc(${params.lam}, ${params.mu}, test_c, False)
+        w = simulate_mmc(${params.lam}, ${params.mu}, test_c, 1)  # No shock for recommendation
         test_ws.append(w)
     
     if np.mean(test_ws) <= ${params.targetWait}:
@@ -309,6 +382,7 @@ for test_c in range(1, 21):
         found = True
         break
 
+# Generate wait time distribution plot
 plt.style.use('default')
 fig, ax = plt.subplots(figsize=(11, 6))
 fig.patch.set_facecolor('#f8fafb')
@@ -325,7 +399,8 @@ if len(patches) > 0:
 ax.axvline(mean_wait, color='#84cc16', lw=4, label=f'Mean: {mean_wait:.1f} min', linestyle='-', alpha=0.9)
 ax.axvline(${params.targetWait}, color='#6366f1', ls='--', lw=3, label=f'Target: ${params.targetWait} min', alpha=0.8)
 
-ax.set_title(f'M/M/c Queue: Wait Time Distribution (n={n_sims})\\nServers: ${params.c} | ρ = {(${params.lam}/(${params.c}*${params.mu})):.2f}', 
+shock_label = "No Shock" if ${params.shockMult} == 1 else f"${params.shockMult}× Shock"
+ax.set_title(f'M/M/c Queue: Wait Time Distribution (n={n_sims})\\nServers: ${params.c} | ρ = {(${params.lam}/(${params.c}*${params.mu})):.2f} | {shock_label}', 
              fontsize=14, fontweight='bold', color='#1a0d2e', pad=20)
 ax.set_xlabel('Average Wait Time (Minutes)', fontsize=12, fontweight='bold', color='#2e1065')
 ax.set_ylabel('Frequency', fontsize=12, fontweight='bold', color='#2e1065')
@@ -338,6 +413,56 @@ plt.savefig(buf, format='png', dpi=150, bbox_inches='tight')
 plt.close()
 img = base64.b64encode(buf.getvalue()).decode('utf-8')
 
+# Generate time path visualization
+fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 8))
+fig.patch.set_facecolor('#f8fafb')
+
+# Plot 1: Arrival Rate Over Time
+ax1.set_facecolor('#ffffff')
+ax1.plot(time_points, arrival_rates, color='#4c1d95', linewidth=3, label='Arrival Rate')
+ax1.axhline(${params.lam}, color='#84cc16', linestyle='--', linewidth=2, alpha=0.7, label='Baseline Rate')
+
+if ${params.shockMult} > 1:
+    ax1.axvspan(10, 12, alpha=0.2, color='#dc2626', label='Shock Period')
+
+ax1.set_ylabel('Arrival Rate (patients/hr)', fontsize=11, fontweight='bold', color='#2e1065')
+ax1.set_title('System Dynamics Over 24 Hours', fontsize=14, fontweight='bold', color='#1a0d2e', pad=15)
+ax1.legend(loc='upper right', fontsize=10)
+ax1.grid(True, alpha=0.2)
+ax1.set_xlim(0, 24)
+
+# Plot 2: Queue Length Over Time
+ax2.set_facecolor('#ffffff')
+ax2.fill_between(time_points, queue_lengths, alpha=0.3, color='#a78bfa')
+ax2.plot(time_points, queue_lengths, color='#4c1d95', linewidth=3, label='Queue Length')
+
+if ${params.shockMult} > 1:
+    ax2.axvspan(10, 12, alpha=0.2, color='#dc2626', label='Shock Period')
+    # Mark recovery point (when queue returns to near-baseline)
+    baseline_queue = np.mean(queue_lengths[0:40])  # First 10 hours
+    recovery_idx = None
+    for i in range(50, len(queue_lengths)):  # After hour 12
+        if queue_lengths[i] <= baseline_queue * 1.2:
+            recovery_idx = i
+            break
+    if recovery_idx:
+        recovery_time = time_points[recovery_idx]
+        ax2.axvline(recovery_time, color='#84cc16', linestyle='--', linewidth=2, 
+                   label=f'Recovery (~{recovery_time:.1f}hr)')
+
+ax2.set_xlabel('Time (hours)', fontsize=11, fontweight='bold', color='#2e1065')
+ax2.set_ylabel('Patients in Queue', fontsize=11, fontweight='bold', color='#2e1065')
+ax2.legend(loc='upper right', fontsize=10)
+ax2.grid(True, alpha=0.2)
+ax2.set_xlim(0, 24)
+
+plt.tight_layout()
+buf2 = io.BytesIO()
+plt.savefig(buf2, format='png', dpi=150, bbox_inches='tight')
+plt.close()
+time_img = base64.b64encode(buf2.getvalue()).decode('utf-8')
+
+# Generate text report
 report = "═══════════════════════════════════════\\n"
 report += "  M/M/c SIMULATION RESULTS\\n"
 report += "═══════════════════════════════════════\\n\\n"
@@ -352,7 +477,15 @@ report += f"  • Std Dev: {np.std(ensemble_waits):.1f} min\\n"
 report += f"  • Median: {np.median(ensemble_waits):.1f} min\\n"
 report += f"  • 95th %ile: {np.percentile(ensemble_waits, 95):.1f} min\\n"
 
-shock_text = "YES (5× surge)" if ${params.shock ? 'True' : 'False'} else "NO"
+if ${params.shockMult} == 1:
+    shock_text = "NO (Baseline)"
+elif ${params.shockMult} == 2:
+    shock_text = "YES (2× surge, hrs 10-12)"
+elif ${params.shockMult} == 3:
+    shock_text = "YES (3× surge, hrs 10-12)"
+else:
+    shock_text = "YES (5× surge, hrs 10-12)"
+
 report += f"\\nShock: {shock_text}\\n"
 
 if found:
@@ -365,13 +498,14 @@ if found:
 else:
     rec_text = "⚠ Target unreachable\\nConsider demand management"
 
-(report, img, rec_text)
+(report, img, time_img, rec_text)
         `;
 
-        const [report, img, rec] = await pyodide.runPythonAsync(code);
+        const [report, img, timeImg, rec] = await pyodide.runPythonAsync(code);
         document.getElementById('text-log').innerText = report;
         document.getElementById('rec-box').innerText = rec;
         document.getElementById('plot-img').src = "data:image/png;base64," + img;
+        document.getElementById('time-plot-img').src = "data:image/png;base64," + timeImg;
         document.getElementById('output-area').style.display = 'block';
     }
 </script>

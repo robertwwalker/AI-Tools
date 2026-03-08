@@ -8,7 +8,7 @@
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=IBM+Plex+Mono:wght@400;600&family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -29,7 +29,7 @@
 <div class="container">
     <div class="page-header">
         <h1>Priority Queue (Non-Preemptive)</h1>
-        <p class="subtitle">Triage Systems & Variance Redistribution</p>
+        <p class="subtitle">Triage Systems, Variance Redistribution & Class-Specific Dynamics</p>
     </div>
 
     <aside class="variable-sidebar">
@@ -126,6 +126,7 @@
 
     <section class="lab-section">
         <h2>Interactive Simulation Laboratory</h2>
+        <p>Explore triage systems where high-priority patients receive preferential service. Analyze variance redistribution dynamics—how priority schemes shift waiting time from critical to stable patients. Time-path visualizations show class-specific wait times and the wait time ratio evolution during surge events.</p>
         
         <div class="lab-ui">
             <div class="control-grid">
@@ -161,9 +162,27 @@
                 </div>
             </div>
 
-            <div class="shock-bar">
-                <input type="checkbox" id="shock_on">
-                <label for="shock_on">🚨 SIMULATE SYSTEM SHOCK (5× Arrivals for 2 Hours at Hour 10)</label>
+            <div class="shock-section">
+                <strong>🚨 System Shock Simulation</strong>
+                <p class="shock-description">Test system resilience with surge scenarios (elevated arrivals from hour 10-12)</p>
+                <div class="shock-options">
+                    <label class="shock-radio">
+                        <input type="radio" name="shock" value="none" checked>
+                        <span>No Shock (Baseline)</span>
+                    </label>
+                    <label class="shock-radio">
+                        <input type="radio" name="shock" value="2x">
+                        <span>2× Surge (Moderate)</span>
+                    </label>
+                    <label class="shock-radio">
+                        <input type="radio" name="shock" value="3x">
+                        <span>3× Surge (High)</span>
+                    </label>
+                    <label class="shock-radio">
+                        <input type="radio" name="shock" value="5x">
+                        <span>5× Surge (Extreme)</span>
+                    </label>
+                </div>
             </div>
 
             <button id="runBtn" onclick="runSimulation()" disabled>
@@ -177,7 +196,15 @@
                         <div id="rec-box"></div>
                     </div>
                     <div class="img-wrap">
-                        <img id="plot-img" src="" alt="Simulation Results" />
+                        <img id="plot-img" src="" alt="Wait Time Distribution" />
+                    </div>
+                </div>
+                
+                <div class="time-path-section">
+                    <h3>System Dynamics & Variance Redistribution</h3>
+                    <p>Shows how priority queueing shifts waiting time variance from high-priority to low-priority patients over time.</p>
+                    <div class="img-wrap">
+                        <img id="time-plot-img" src="" alt="Time Path Analysis" />
                     </div>
                 </div>
             </div>
@@ -235,12 +262,19 @@
         btn.disabled = true;
         btn.innerHTML = '<span>Processing 60 Realities</span><span class="loading-spinner"></span>';
         
+        const shockRadio = document.querySelector('input[name="shock"]:checked');
+        const shockValue = shockRadio ? shockRadio.value : 'none';
+        let shockMultiplier = 1;
+        if (shockValue === '2x') shockMultiplier = 2;
+        else if (shockValue === '3x') shockMultiplier = 3;
+        else if (shockValue === '5x') shockMultiplier = 5;
+        
         const params = {
             lam: parseFloat(document.getElementById('lam').value),
             mu: parseFloat(document.getElementById('mu').value),
             c: parseInt(document.getElementById('servers').value),
             priority_pct: parseFloat(document.getElementById('priority_pct').value),
-            shock: document.getElementById('shock_on').checked,
+            shockMult: shockMultiplier,
             targetWait: parseFloat(document.getElementById('target_wait').value),
             targetLoss: parseFloat(document.getElementById('target_loss').value)
         };
@@ -255,7 +289,7 @@
         const rho = params.lam / (params.c * params.mu);
         if (rho >= 1.0) {
             const recommend = Math.ceil(params.lam / params.mu);
-            alert(`⚠ UNSTABLE SYSTEM: ρ = ${rho.toFixed(2)} ≥ 1.0\\n\\nMinimum servers: ${recommend}\\nCurrent: ${params.c}`);
+            alert(`⚠ UNSTABLE SYSTEM: ρ = ${rho.toFixed(2)} ≥ 1.0\n\nMinimum servers: ${recommend}\nCurrent: ${params.c}`);
             btn.disabled = false;
             btn.innerHTML = '<span>Execute Ensemble Simulation</span>';
             return;
@@ -273,17 +307,79 @@ import numpy as np
 import matplotlib.pyplot as plt
 import io, base64
 
-def simulate_priority(lam, mu, c, priority_pct, is_shock):
+def simulate_priority_with_tracking(lam, mu, c, priority_pct, shock_mult):
+    """Simulate with separate tracking for Class 1 and Class 2"""
     t, dur = 0, 24
     arrs = []
     while t < dur:
-        l = lam * 5 if (is_shock and 10 <= t <= 12) else lam
+        l = lam * shock_mult if (shock_mult > 1 and 10 <= t <= 12) else lam
         t += np.random.exponential(1/l)
         if t < dur:
             p = 1 if np.random.random() < (priority_pct/100) else 2
             arrs.append((t, p))
     
-    # Sort by priority: class 1 first, then by arrival time
+    # Sort by priority
+    arrs.sort(key=lambda x: (x[0] if x[1]==1 else x[0]+1000))
+    
+    free = [0.0] * c
+    waits_c1 = []
+    waits_c2 = []
+    all_waits = []
+    
+    # Track over time
+    time_points = np.linspace(0, 24, 100)
+    wait_ratio_over_time = []
+    arrival_rates = []
+    class1_waits_time = []
+    class2_waits_time = []
+    
+    for a_t, p in arrs:
+        free.sort()
+        start = max(a_t, free[0])
+        w = (start - a_t) * 60
+        free[0] = start + np.random.exponential(1/mu)
+        all_waits.append(w)
+        if p == 1:
+            waits_c1.append(w)
+        else:
+            waits_c2.append(w)
+    
+    # Calculate metrics over time
+    for tp in time_points:
+        # Arrival rate
+        rate = lam * shock_mult if (shock_mult > 1 and 10 <= tp <= 12) else lam
+        arrival_rates.append(rate)
+        
+        # Average waits in windows
+        window = 1.0  # 1 hour window
+        c1_in_window = [w for w, (t, p) in zip(all_waits, arrs) if p == 1 and tp - window/2 <= t <= tp + window/2]
+        c2_in_window = [w for w, (t, p) in zip(all_waits, arrs) if p == 2 and tp - window/2 <= t <= tp + window/2]
+        
+        avg_c1 = np.mean(c1_in_window) if c1_in_window else 1
+        avg_c2 = np.mean(c2_in_window) if c2_in_window else 1
+        
+        class1_waits_time.append(avg_c1)
+        class2_waits_time.append(avg_c2)
+        
+        # Ratio (how much worse Class 2 is than Class 1)
+        ratio = avg_c2 / avg_c1 if avg_c1 > 0 else 1
+        wait_ratio_over_time.append(ratio)
+    
+    return (np.mean(all_waits) if all_waits else 0, time_points, wait_ratio_over_time, 
+            arrival_rates, class1_waits_time, class2_waits_time,
+            np.mean(waits_c1) if waits_c1 else 0, np.mean(waits_c2) if waits_c2 else 0)
+
+def simulate_priority(lam, mu, c, priority_pct, shock_mult):
+    """Simple version for ensemble"""
+    t, dur = 0, 24
+    arrs = []
+    while t < dur:
+        l = lam * shock_mult if (shock_mult > 1 and 10 <= t <= 12) else lam
+        t += np.random.exponential(1/l)
+        if t < dur:
+            p = 1 if np.random.random() < (priority_pct/100) else 2
+            arrs.append((t, p))
+    
     arrs.sort(key=lambda x: (x[0] if x[1]==1 else x[0]+1000))
     
     free = [0.0] * c
@@ -296,13 +392,19 @@ def simulate_priority(lam, mu, c, priority_pct, is_shock):
         free[0] = start + np.random.exponential(1/mu)
         waits.append(w)
     
-    return np.mean(waits) if waits else 0, 0, waits
+    return np.mean(waits) if waits else 0
+
+# Run one detailed simulation
+(mean_wait_detail, time_points, wait_ratio, arrival_rates, c1_waits, c2_waits, 
+ c1_mean, c2_mean) = simulate_priority_with_tracking(
+    ${params.lam}, ${params.mu}, ${params.c}, ${params.priority_pct}, ${params.shockMult}
+)
 
 n_sims = 60
 ensemble_waits = []
 
 for _ in range(n_sims):
-    w, _, _ = simulate_priority(${params.lam}, ${params.mu}, ${params.c}, ${params.priority_pct}, ${params.shock ? 'True' : 'False'})
+    w = simulate_priority(${params.lam}, ${params.mu}, ${params.c}, ${params.priority_pct}, ${params.shockMult})
     ensemble_waits.append(w)
 
 rec_c = ${params.c}
@@ -314,7 +416,7 @@ for test_c in range(1, 21):
     
     test_ws = []
     for _ in range(15):
-        w, _, _ = simulate_priority(${params.lam}, ${params.mu}, test_c, ${params.priority_pct}, False)
+        w = simulate_priority(${params.lam}, ${params.mu}, test_c, ${params.priority_pct}, 1)
         test_ws.append(w)
     
     if np.mean(test_ws) <= ${params.targetWait}:
@@ -322,6 +424,7 @@ for test_c in range(1, 21):
         found = True
         break
 
+# Generate wait time distribution plot
 plt.style.use('default')
 fig, ax = plt.subplots(figsize=(11, 6))
 fig.patch.set_facecolor('#f8fafb')
@@ -338,7 +441,8 @@ if len(patches) > 0:
 ax.axvline(mean_wait, color='#84cc16', lw=4, label=f'Mean: {mean_wait:.1f} min', linestyle='-', alpha=0.9)
 ax.axvline(${params.targetWait}, color='#6366f1', ls='--', lw=3, label=f'Target: ${params.targetWait} min', alpha=0.8)
 
-ax.set_title(f'Priority Queue: Wait Time Distribution (n={n_sims})\\nServers: ${params.c} | High Priority: ${params.priority_pct}% | ρ = {(${params.lam}/(${params.c}*${params.mu})):.2f}', 
+shock_label = "No Shock" if ${params.shockMult} == 1 else f"${params.shockMult}× Shock"
+ax.set_title(f'Priority Queue: Wait Time Distribution (n={n_sims})\\nServers: ${params.c} | High Priority: ${params.priority_pct}% | {shock_label}', 
              fontsize=14, fontweight='bold', color='#1a0d2e', pad=20)
 ax.set_xlabel('Average Wait Time (Minutes)', fontsize=12, fontweight='bold', color='#2e1065')
 ax.set_ylabel('Frequency', fontsize=12, fontweight='bold', color='#2e1065')
@@ -351,6 +455,54 @@ plt.savefig(buf, format='png', dpi=150, bbox_inches='tight')
 plt.close()
 img = base64.b64encode(buf.getvalue()).decode('utf-8')
 
+# Generate time path visualization
+fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 8))
+fig.patch.set_facecolor('#f8fafb')
+
+# Plot 1: Arrival Rate
+ax1.set_facecolor('#ffffff')
+ax1.plot(time_points, arrival_rates, color='#4c1d95', linewidth=3, label='Total Arrival Rate')
+ax1.axhline(${params.lam}, color='#84cc16', linestyle='--', linewidth=2, alpha=0.7, label='Baseline Rate')
+
+if ${params.shockMult} > 1:
+    ax1.axvspan(10, 12, alpha=0.2, color='#dc2626', label='Shock Period')
+
+ax1.set_ylabel('Arrival Rate (patients/hr)', fontsize=11, fontweight='bold', color='#2e1065')
+ax1.set_title('Priority Queue: Variance Redistribution Dynamics', fontsize=14, fontweight='bold', color='#1a0d2e', pad=15)
+ax1.legend(loc='upper right', fontsize=10)
+ax1.grid(True, alpha=0.2)
+ax1.set_xlim(0, 24)
+
+# Plot 2: Wait Time Comparison and Ratio
+ax2_twin = ax2.twinx()
+ax2.set_facecolor('#ffffff')
+
+# Class-specific wait times
+ax2.plot(time_points, c1_waits, color='#84cc16', linewidth=3, label='Class 1 (High Priority)', alpha=0.8)
+ax2.plot(time_points, c2_waits, color='#dc2626', linewidth=3, label='Class 2 (Low Priority)', alpha=0.8)
+
+# Wait time ratio on secondary axis
+ax2_twin.plot(time_points, wait_ratio, color='#a78bfa', linewidth=2, linestyle='--', label='Wait Ratio (C2/C1)', alpha=0.7)
+ax2_twin.axhline(1, color='#666', linestyle=':', linewidth=1, alpha=0.5)
+
+if ${params.shockMult} > 1:
+    ax2.axvspan(10, 12, alpha=0.2, color='#dc2626')
+
+ax2.set_xlabel('Time (hours)', fontsize=11, fontweight='bold', color='#2e1065')
+ax2.set_ylabel('Wait Time (minutes)', fontsize=11, fontweight='bold', color='#2e1065')
+ax2_twin.set_ylabel('Wait Time Ratio', fontsize=10, color='#a78bfa')
+ax2.legend(loc='upper left', fontsize=10)
+ax2_twin.legend(loc='upper right', fontsize=9)
+ax2.grid(True, alpha=0.2)
+ax2.set_xlim(0, 24)
+
+plt.tight_layout()
+buf2 = io.BytesIO()
+plt.savefig(buf2, format='png', dpi=150, bbox_inches='tight')
+plt.close()
+time_img = base64.b64encode(buf2.getvalue()).decode('utf-8')
+
+# Generate text report
 report = "═══════════════════════════════════════\\n"
 report += "  PRIORITY QUEUE RESULTS\\n"
 report += "═══════════════════════════════════════\\n\\n"
@@ -364,13 +516,23 @@ report += f"Aggregate Performance (n={n_sims}):\\n"
 report += f"  • Mean Wait: {mean_wait:.1f} min\\n"
 report += f"  • Std Dev: {np.std(ensemble_waits):.1f} min\\n"
 report += f"  • Median: {np.median(ensemble_waits):.1f} min\\n"
-report += f"  • 95th %ile: {np.percentile(ensemble_waits, 95):.1f} min\\n"
+report += f"  • 95th %ile: {np.percentile(ensemble_waits, 95):.1f} min\\n\\n"
 
-shock_text = "YES (5× surge)" if ${params.shock ? 'True' : 'False'} else "NO"
+report += f"By Priority Class:\\n"
+report += f"  • Class 1 (High): {c1_mean:.1f} min\\n"
+report += f"  • Class 2 (Low): {c2_mean:.1f} min\\n"
+report += f"  • Ratio (C2/C1): {(c2_mean/c1_mean if c1_mean > 0 else 1):.1f}×\\n"
+
+if ${params.shockMult} == 1:
+    shock_text = "NO (Baseline)"
+elif ${params.shockMult} == 2:
+    shock_text = "YES (2× surge, hrs 10-12)"
+elif ${params.shockMult} == 3:
+    shock_text = "YES (3× surge, hrs 10-12)"
+else:
+    shock_text = "YES (5× surge, hrs 10-12)"
+
 report += f"\\nShock: {shock_text}\\n"
-report += f"\\n⚠ Note: This is aggregate wait.\\n"
-report += f"High-priority patients wait much less,\\n"
-report += f"low-priority patients wait much more.\\n"
 
 if found:
     rec_text = f"✓ RECOMMENDED: {rec_c} Servers\\n\\nMeets target ≤ ${params.targetWait} min"
@@ -382,13 +544,14 @@ if found:
 else:
     rec_text = "⚠ Target unreachable\\nConsider capacity expansion"
 
-(report, img, rec_text)
+(report, img, time_img, rec_text)
         `;
 
-        const [report, img, rec] = await pyodide.runPythonAsync(code);
+        const [report, img, timeImg, rec] = await pyodide.runPythonAsync(code);
         document.getElementById('text-log').innerText = report;
         document.getElementById('rec-box').innerText = rec;
         document.getElementById('plot-img').src = "data:image/png;base64," + img;
+        document.getElementById('time-plot-img').src = "data:image/png;base64," + timeImg;
         document.getElementById('output-area').style.display = 'block';
     }
 </script>

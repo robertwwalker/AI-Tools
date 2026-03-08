@@ -7,7 +7,7 @@
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=IBM+Plex+Mono:wght@400;600&family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             /* Deep Purple Palette */
@@ -383,7 +383,7 @@
 <header class="hero">
     <h1>The <span class="highlight">Calculus of Chaos</span></h1>
     <p>Advanced Capacity Optimization & Stochastic Simulation for High-Stakes Healthcare Systems</p>
-    <p class="subtitle">Interactive Laboratory for Queueing Theory & Operations Research</p>
+    <p class="subtitle">Interactive Laboratory for Queueing Theory, Operations Research & Surge Capacity Planning</p>
 </header>
 
 <div class="container">
@@ -392,11 +392,13 @@
         
         <p>This interactive laboratory provides hands-on exploration of <strong>queueing theory</strong> and <em>capacity optimization</em> through browser-based stochastic simulation. All computation runs entirely in your browser using Python (via Pyodide) with no server dependencies.</p>
         
-        <p>Healthcare systems face a fundamental challenge: <strong>arrivals follow a Poisson process</strong>, exhibiting natural "clumping" that creates queues even when average capacity exceeds average demand. Traditional planning methods that rely on simple averages fail catastrophically in these environments.</p>
+        <p>Healthcare systems face a fundamental challenge: <strong>arrivals follow a Poisson process</strong>, exhibiting natural "clumping" that creates queues even when average capacity exceeds average demand. Traditional planning methods that rely on simple averages fail catastrophically in these environments, especially during surge events.</p>
         
-        <p>Through <em>ensemble simulation</em> (60+ parallel realities), we capture the full spectrum of operational volatility and identify optimal capacity configurations that balance waiting costs against staffing costs.</p>
+        <p>Through <em>ensemble simulation</em> (60+ parallel realities), we capture the full spectrum of operational volatility and identify optimal capacity configurations. Our <strong>time-path visualizations</strong> reveal system dynamics during normal operations and shock scenarios, showing exactly how long it takes systems to recover from surge events.</p>
         
-        <p><strong>Each model below addresses a specific operational scenario:</strong></p>
+        <p><strong>New: Shock Scenario Analysis</strong> — Each model now supports testing four surge magnitudes (baseline, 2×, 3×, 5× arrivals) with visual recovery analysis. This enables evidence-based surge capacity planning and preparedness assessment.</p>
+        
+        <p><strong>Each model below addresses a specific operational scenario with interactive simulations and dynamic visualizations:</strong></p>
     </section>
 
     <div class="models-grid">
@@ -495,9 +497,10 @@
 </div>
 
 <footer>
-    <p><strong>Chaos Lab</strong> • Operations Science & Capacity Optimization</p>
-    <p>Built with Pyodide, NumPy, Matplotlib • All computation runs in your browser</p>
-    <p>Educational tool for queueing theory and stochastic simulation</p>
+    <p><strong>Chaos Lab: The Calculus of Chaos</strong> • Operations Science & Capacity Optimization</p>
+    <p>Interactive queueing theory simulations with surge scenario analysis, time-path visualizations, and recovery dynamics</p>
+    <p>Built with Pyodide, NumPy, Matplotlib • All computation runs client-side in your browser • No data transmission or server dependencies</p>
+    <p>Educational tool for healthcare operations research, stochastic simulation, and evidence-based capacity planning</p>
 </footer>
 
 </body>
