@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finite Capacity Queue | Chaos Lab</title>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=IBM+Plex+Mono:wght@400;600&family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav>
+    <div class="container">
+        <a href="index.html" class="logo">Chaos Lab</a>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="mmc.html">M/M/c Standard</a>
+            <a href="circular.html" class="active">Finite Capacity</a>
+            <a href="priority.html">Priority Queue</a>
+            <a href="reneging.html">Reneging</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="page-header">
+        <h1>M/M/c/K Finite Capacity Queue</h1>
+        <p class="subtitle">Modeling Resource-Constrained Systems with Blocking</p>
+    </div>
+
+    <section class="theory-section">
+        <h2>Mathematical Foundation</h2>
+        
+        <p>The M/M/c/K model extends the standard M/M/c queue by imposing a <strong>hard capacity limit K</strong> on the total number of customers in the system (being served + waiting). When K patients are present, new arrivals are <em>blocked</em> and diverted elsewhere.</p>
+        
+        <h3>Blocking Probability</h3>
+        <p>The critical performance metric is <strong>P<sub>B</sub></strong>, the probability that an arriving customer finds the system full:</p>
+        
+        <div class="math-box">
+            $$P_B = P_K = P_0 \frac{(c\rho)^K}{c! \cdot c^{K-c}}$$
+        </div>
+        
+        <p>Where P₀ is modified for the finite system:</p>
+        
+        <div class="math-box">
+            $$P_0 = \left[\sum_{n=0}^{c-1} \frac{(c\rho)^n}{n!} + \frac{(c\rho)^c}{c!}\sum_{n=c}^{K}\left(\frac{\rho}{1}\right)^{n-c}\right]^{-1}$$
+        </div>
+        
+        <h3>Key Difference from M/M/c</h3>
+        <p>Unlike the infinite-capacity model, M/M/c/K can be stable even when ρ ≥ 1 because the finite buffer prevents unbounded growth. However, this stability comes at the cost of high blocking rates.</p>
+        
+        <h3>Effective Arrival Rate</h3>
+        <p>Due to blocking, the effective throughput is reduced:</p>
+        
+        <div class="math-box">
+            $$\lambda_{eff} = \lambda(1 - P_B)$$
+        </div>
+    </section>
+
+    <section class="example-section">
+        <h2>Real-World Example: ICU Bed Management</h2>
+        
+        <div class="example-card">
+            <h3>Scenario: Regional Trauma Center ICU</h3>
+            
+            <p><strong>Operational Context:</strong></p>
+            <ul>
+                <li>ICU bed capacity: <strong>20 beds (K = 20)</strong></li>
+                <li>Average arrival rate: <strong>8 patients/day</strong> (λ = 8/24 ≈ 0.33/hr)</li>
+                <li>Average ICU length of stay: <strong>72 hours</strong> (μ = 1/72 ≈ 0.0139/hr)</li>
+                <li>Beds (servers): Each bed is a "server" → <strong>c = 20</strong></li>
+                <li>Policy goal: < 5% diversion rate</li>
+            </ul>
+            
+            <p><strong>Analysis:</strong></p>
+            <p>This is a high-utilization system where K = c (capacity equals servers). Any patient arrival when all beds are full triggers ambulance diversion.</p>
+            
+            <p><strong>Critical Question:</strong> What blocking rate should we expect, and would expanding to K=22 or K=25 significantly reduce diversions?</p>
+            
+            <div class="hint-box">
+                💡 <strong>Try this:</strong> Input λ=0.33, μ=0.0139, c=20, K=20. Then test K=22, K=25 to see blocking reduction. Enable shock to simulate mass casualty event.
+            </div>
+        </div>
+    </section>
+
+    <section class="lab-section">
+        <h2>Interactive Simulation Laboratory</h2>
+        
+        <div class="lab-ui">
+            <div class="control-grid">
+                <div class="control-group">
+                    <label>Arrivals (λ/hr)</label>
+                    <input type="number" id="lam" value="0.33" step="0.05" min="0">
+                </div>
+                <div class="control-group">
+                    <label>Service (μ/hr/Bed)</label>
+                    <input type="number" id="mu" value="0.0139" step="0.001" min="0.001">
+                </div>
+                <div class="control-group">
+                    <label>Servers/Beds (c)</label>
+                    <input type="number" id="servers" value="20" step="1" min="1">
+                </div>
+                <div class="control-group">
+                    <label>Max Capacity (K)</label>
+                    <input type="number" id="capacity" value="20" step="1" min="1">
+                </div>
+            </div>
+
+            <div class="recommendation-target">
+                <strong>Capacity Optimizer Targets</strong>
+                <div class="control-grid" style="margin-top:15px;">
+                    <div class="control-group">
+                        <label>Target Max Wait (min)</label>
+                        <input type="number" id="target_wait" value="30" step="5" min="5">
+                    </div>
+                    <div class="control-group">
+                        <label>Max Blocking Rate (%)</label>
+                        <input type="number" id="target_loss" value="5" step="1" min="0" max="100">
+                    </div>
+                </div>
+            </div>
+
+            <div class="shock-bar">
+                <input type="checkbox" id="shock_on">
+                <label for="shock_on">🚨 SIMULATE SYSTEM SHOCK (5× Arrivals for 2 Hours at Hour 10)</label>
+            </div>
+
+            <button id="runBtn" onclick="runSimulation()" disabled>
+                <span>Initializing Python Computation Engine...</span>
+            </button>
+
+            <div id="output-area" style="display:none;">
+                <div class="res-grid">
+                    <div>
+                        <div id="text-log"></div>
+                        <div id="rec-box"></div>
+                    </div>
+                    <div class="img-wrap">
+                        <img id="plot-img" src="" alt="Simulation Results" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="interpretation-section">
+        <h2>Interpreting Your Results</h2>
+        
+        <h3>Blocking vs. Waiting</h3>
+        
+        <div class="metric-card">
+            <h4>Loss Rate (Blocking Probability)</h4>
+            <p><strong>< 2%:</strong> <span class="good">Excellent—rare diversions</span></p>
+            <p><strong>2-5%:</strong> <span class="ok">Acceptable for non-emergency</span></p>
+            <p><strong>5-10%:</strong> <span class="warning">High—impacts regional system</span></p>
+            <p><strong>> 10%:</strong> <span class="danger">Critical—system failure</span></p>
+        </div>
+        
+        <div class="metric-card">
+            <h4>The K vs. c Relationship</h4>
+            <p><strong>K = c:</strong> No queue—pure blocking model (ICU, hotel rooms)</p>
+            <p><strong>K > c:</strong> Queue allowed—waiting room/hallway capacity</p>
+            <p><strong>Optimal K:</strong> Balance blocking costs vs. waiting space costs</p>
+        </div>
+        
+        <div class="metric-card">
+            <h4>Cascade Effects</h4>
+            <p>When your facility blocks patients, they're diverted to neighbors. If all regional facilities operate near capacity, blocking creates a <strong>cascade failure</strong> where diversions compound across the network.</p>
+            <p>Industry best practice: Keep blocking < 5% to maintain regional resilience.</p>
+        </div>
+    </section>
+</div>
+
+<footer>
+    <p><strong>Chaos Lab</strong> • M/M/c/K Finite Capacity Model</p>
+    <p>All computation runs in your browser using Pyodide</p>
+</footer>
+
+<script>
+    let pyodide;
+
+    async function init() {
+        pyodide = await loadPyodide();
+        await pyodide.loadPackage(["numpy", "matplotlib"]);
+        document.getElementById('runBtn').disabled = false;
+        document.getElementById('runBtn').innerHTML = '<span>Execute Ensemble Simulation</span>';
+    }
+    init();
+
+    async function runSimulation() {
+        const btn = document.getElementById('runBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span>Processing 60 Realities</span><span class="loading-spinner"></span>';
+        
+        const params = {
+            lam: parseFloat(document.getElementById('lam').value),
+            mu: parseFloat(document.getElementById('mu').value),
+            c: parseInt(document.getElementById('servers').value),
+            K: parseInt(document.getElementById('capacity').value),
+            shock: document.getElementById('shock_on').checked,
+            targetWait: parseFloat(document.getElementById('target_wait').value),
+            targetLoss: parseFloat(document.getElementById('target_loss').value)
+        };
+
+        if (params.lam <= 0 || params.mu <= 0 || params.c <= 0 || params.K <= 0) {
+            alert('Please ensure all parameters are positive values.');
+            btn.disabled = false;
+            btn.innerHTML = '<span>Execute Ensemble Simulation</span>';
+            return;
+        }
+
+        if (params.K < params.c) {
+            alert('⚠ Capacity K must be ≥ servers c');
+            btn.disabled = false;
+            btn.innerHTML = '<span>Execute Ensemble Simulation</span>';
+            return;
+        }
+
+        await runCircular(params);
+        
+        btn.disabled = false;
+        btn.innerHTML = '<span>Execute Ensemble Simulation</span>';
+    }
+
+    async function runCircular(params) {
+        const code = `
+import numpy as np
+import matplotlib.pyplot as plt
+import io, base64
+
+def simulate_circular(lam, mu, c, K, is_shock):
+    t, dur = 0, 24
+    arrs = []
+    while t < dur:
+        l = lam * 5 if (is_shock and 10 <= t <= 12) else lam
+        t += np.random.exponential(1/l)
+        if t < dur:
+            arrs.append(t)
+    
+    free = [0.0] * c
+    waits = []
+    lost = 0
+    in_system = []
+    
+    for a_t in arrs:
+        in_system = [(arr, comp) for arr, comp in in_system if comp > a_t]
+        
+        if len(in_system) >= K:
+            lost += 1
+            continue
+        
+        free.sort()
+        start = max(a_t, free[0])
+        w = (start - a_t) * 60
+        
+        service_time = np.random.exponential(1/mu)
+        completion_time = start + service_time
+        free[0] = completion_time
+        waits.append(w)
+        in_system.append((a_t, completion_time))
+    
+    avg_w = np.mean(waits) if waits else 0
+    loss_pct = (lost / len(arrs) * 100) if arrs else 0
+    return avg_w, loss_pct, waits
+
+n_sims = 60
+ensemble_waits = []
+ensemble_loss = []
+
+for _ in range(n_sims):
+    w, l, _ = simulate_circular(${params.lam}, ${params.mu}, ${params.c}, ${params.K}, ${params.shock})
+    ensemble_waits.append(w)
+    ensemble_loss.append(l)
+
+rec_K = ${params.K}
+found = False
+
+for test_K in range(${params.c}, ${params.c} + 20):
+    test_ws, test_ls = [], []
+    for _ in range(15):
+        w, l, _ = simulate_circular(${params.lam}, ${params.mu}, ${params.c}, test_K, False)
+        test_ws.append(w)
+        test_ls.append(l)
+    
+    if np.mean(test_ws) <= ${params.targetWait} and np.mean(test_ls) <= ${params.targetLoss}:
+        rec_K = test_K
+        found = True
+        break
+
+plt.style.use('default')
+fig, ax = plt.subplots(figsize=(11, 6))
+fig.patch.set_facecolor('#f8fafb')
+ax.set_facecolor('#ffffff')
+
+mean_wait = np.mean(ensemble_waits)
+mean_loss = np.mean(ensemble_loss)
+
+n, bins, patches = ax.hist(ensemble_waits, bins=min(30, max(15, len(ensemble_waits)//3)), 
+                            color='#4c1d95', edgecolor='white', alpha=0.85, linewidth=1.5)
+
+if len(patches) > 0:
+    for i, patch in enumerate(patches):
+        patch.set_facecolor(plt.cm.viridis(i / len(patches)))
+
+ax.axvline(mean_wait, color='#84cc16', lw=4, label=f'Mean: {mean_wait:.1f} min', linestyle='-', alpha=0.9)
+ax.axvline(${params.targetWait}, color='#6366f1', ls='--', lw=3, label=f'Target: ${params.targetWait} min', alpha=0.8)
+
+ax.set_title(f'M/M/c/K Queue: Wait Time Distribution (n={n_sims})\\nc={${params.c}}, K={${params.K}} | Blocking: {mean_loss:.1f}%', 
+             fontsize=14, fontweight='bold', color='#1a0d2e', pad=20)
+ax.set_xlabel('Average Wait Time (Minutes)', fontsize=12, fontweight='bold', color='#2e1065')
+ax.set_ylabel('Frequency', fontsize=12, fontweight='bold', color='#2e1065')
+ax.legend(loc='upper right', fontsize=11)
+ax.grid(True, alpha=0.2)
+
+plt.tight_layout()
+buf = io.BytesIO()
+plt.savefig(buf, format='png', dpi=150, bbox_inches='tight')
+plt.close()
+img = base64.b64encode(buf.getvalue()).decode('utf-8')
+
+report = "═══════════════════════════════════════\\n"
+report += "  M/M/c/K SIMULATION RESULTS\\n"
+report += "═══════════════════════════════════════\\n\\n"
+report += f"Configuration:\\n"
+report += f"  • Servers (c): ${params.c}\\n"
+report += f"  • Max Capacity (K): ${params.K}\\n"
+report += f"  • Arrival Rate: ${params.lam}/hr\\n"
+report += f"  • Service Rate: ${params.mu}/hr\\n\\n"
+report += f"Performance (n={n_sims}):\\n"
+report += f"  • Mean Wait: {mean_wait:.1f} min\\n"
+report += f"  • Std Dev: {np.std(ensemble_waits):.1f} min\\n"
+report += f"  • Blocking Rate: {mean_loss:.2f}%"
+if mean_loss > 10:
+    report += " ⚠ High!\\n"
+else:
+    report += "\\n"
+report += f"  • 95th %ile: {np.percentile(ensemble_waits, 95):.1f} min\\n"
+
+shock_text = "YES (5× surge)" if ${params.shock} else "NO"
+report += f"\\nShock: {shock_text}\\n"
+
+if found:
+    rec_text = f"✓ RECOMMENDED K: {rec_K} slots\\n\\nMeets targets:\\n  • Wait ≤ ${params.targetWait} min\\n  • Blocking ≤ ${params.targetLoss}%"
+    expansion = rec_K - ${params.K}
+    if expansion > 0:
+        rec_text += f"\\n\\n💡 Add {expansion} capacity slots"
+    elif expansion < 0:
+        rec_text += f"\\n\\n✓ Can reduce by {abs(expansion)} slots"
+else:
+    rec_text = "⚠ Target unreachable\\nConsider capacity expansion\\nor demand management"
+
+(report, img, rec_text)
+        `;
+
+        const [report, img, rec] = await pyodide.runPythonAsync(code);
+        document.getElementById('text-log').innerText = report;
+        document.getElementById('rec-box').innerText = rec;
+        document.getElementById('plot-img').src = "data:image/png;base64," + img;
+        document.getElementById('output-area').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>

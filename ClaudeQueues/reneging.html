@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reneging Queue | Chaos Lab</title>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=IBM+Plex+Mono:wght@400;600&family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav>
+    <div class="container">
+        <a href="index.html" class="logo">Chaos Lab</a>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="mmc.html">M/M/c Standard</a>
+            <a href="circular.html">Finite Capacity</a>
+            <a href="priority.html">Priority Queue</a>
+            <a href="reneging.html" class="active">Reneging</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="page-header">
+        <h1>Reneging/Abandonment Queue</h1>
+        <p class="subtitle">Modeling Patient Patience & LWBS Behavior</p>
+    </div>
+
+    <section class="theory-section">
+        <h2>Mathematical Foundation</h2>
+        
+        <p>The <strong>M/M/c+G queue</strong> (where +G denotes "generally distributed patience") models systems where customers have limited patience. If a patient's perceived wait time exceeds their individual patience threshold T, they <em>renege</em> (abandon the queue without service).</p>
+        
+        <h3>The Patience Distribution</h3>
+        <p>Empirical studies show emergency department patience follows approximately exponential or Weibull distributions. A common assumption is:</p>
+        
+        <div class="math-box">
+            $$P(\text{Patience} > t) = e^{-\theta t}$$
+        </div>
+        
+        <p>Where θ is the patience rate parameter. Median patience in EDs typically ranges from 60-90 minutes, varying by:</p>
+        <ul>
+            <li><strong>Acuity level:</strong> Chest pain patients more patient than minor injuries</li>
+            <li><strong>Demographics:</strong> Age, socioeconomic factors affect patience</li>
+            <li><strong>Information:</strong> Visible progress, communication extends patience</li>
+        </ul>
+        
+        <h3>Abandonment as System Regulation</h3>
+        <p>Reneging creates a <strong>self-regulating mechanism</strong>: as queues grow, more customers abandon, which caps queue length. However, this "stability" comes at severe cost:</p>
+        
+        <div class="math-box">
+            $$\text{Cost}_{\text{abandonment}} = \text{Revenue Loss} + \text{Poor Outcomes} + \text{Litigation Risk}$$
+        </div>
+        
+        <h3>Left Without Being Seen (LWBS) Rate</h3>
+        <p>The industry metric for abandonment in healthcare:</p>
+        
+        <div class="math-box">
+            $$\text{LWBS Rate} = \frac{\text{Patients Who Left}}{\text{Total Arrivals}} \times 100\%$$
+        </div>
+        
+        <p>Benchmark targets: <strong>< 2%</strong> excellent, <strong>2-5%</strong> acceptable, <strong>> 5%</strong> problematic</p>
+    </section>
+
+    <section class="example-section">
+        <h2>Real-World Example: Urban ED with High LWBS</h2>
+        
+        <div class="example-card">
+            <h3>Scenario: Metro Community Hospital ED</h3>
+            
+            <p><strong>Operational Context:</strong></p>
+            <ul>
+                <li>Average arrival rate: <strong>18 patients/hour</strong></li>
+                <li>Average service time: <strong>25 minutes</strong> (μ = 2.4 patients/hour)</li>
+                <li>Physicians on duty: <strong>4</strong></li>
+                <li>Current LWBS rate: <strong>8%</strong> (unacceptably high)</li>
+                <li>Estimated median patience: <strong>75 minutes</strong> (1.25 hours)</li>
+            </ul>
+            
+            <p><strong>Analysis:</strong></p>
+            <p>Utilization: ρ = 18/(4×2.4) = 1.875 → <span class="warning">SEVERELY OVERLOADED!</span></p>
+            <p>This system is fundamentally unstable. Without abandonment, queues would grow infinitely. Reneging is the only thing preventing total system collapse, but it represents catastrophic failure.</p>
+            
+            <p><strong>Strategic Questions:</strong></p>
+            <ul>
+                <li>How many physicians are needed to reduce LWBS to < 3%?</li>
+                <li>If patience could be extended to 90 minutes (through better communication), what impact on LWBS?</li>
+                <li>What is the revenue impact of 8% LWBS at $500/visit average revenue?</li>
+            </ul>
+            
+            <div class="hint-box">
+                💡 <strong>Try this:</strong> Input λ=18, μ=2.4, c=6 (increased from 4), patience=1.25 hours. Observe LWBS reduction. Then test c=8 to see if additional capacity helps further.
+            </div>
+        </div>
+    </section>
+
+    <section class="lab-section">
+        <h2>Interactive Simulation Laboratory</h2>
+        
+        <div class="lab-ui">
+            <div class="control-grid">
+                <div class="control-group">
+                    <label>Arrivals (λ/hr)</label>
+                    <input type="number" id="lam" value="18" step="0.5" min="0">
+                </div>
+                <div class="control-group">
+                    <label>Service (μ/hr/Server)</label>
+                    <input type="number" id="mu" value="2.4" step="0.1" min="0.1">
+                </div>
+                <div class="control-group">
+                    <label>Servers (c)</label>
+                    <input type="number" id="servers" value="6" step="1" min="1">
+                </div>
+                <div class="control-group">
+                    <label>Max Patience (hours)</label>
+                    <input type="number" id="patience" value="1.25" step="0.1" min="0.1">
+                </div>
+            </div>
+
+            <div class="recommendation-target">
+                <strong>Capacity Optimizer Targets</strong>
+                <div class="control-grid" style="margin-top:15px;">
+                    <div class="control-group">
+                        <label>Target Max Wait (min)</label>
+                        <input type="number" id="target_wait" value="30" step="5" min="5">
+                    </div>
+                    <div class="control-group">
+                        <label>Max LWBS Rate (%)</label>
+                        <input type="number" id="target_loss" value="3" step="1" min="0" max="100">
+                    </div>
+                </div>
+            </div>
+
+            <div class="shock-bar">
+                <input type="checkbox" id="shock_on">
+                <label for="shock_on">🚨 SIMULATE SYSTEM SHOCK (5× Arrivals for 2 Hours at Hour 10)</label>
+            </div>
+
+            <button id="runBtn" onclick="runSimulation()" disabled>
+                <span>Initializing Python Computation Engine...</span>
+            </button>
+
+            <div id="output-area" style="display:none;">
+                <div class="res-grid">
+                    <div>
+                        <div id="text-log"></div>
+                        <div id="rec-box"></div>
+                    </div>
+                    <div class="img-wrap">
+                        <img id="plot-img" src="" alt="Simulation Results" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="interpretation-section">
+        <h2>Interpreting Your Results</h2>
+        
+        <h3>Understanding LWBS Dynamics</h3>
+        
+        <div class="metric-card">
+            <h4>LWBS Rate Benchmarks</h4>
+            <p><strong>< 1%:</strong> <span class="good">Exceptional performance</span></p>
+            <p><strong>1-3%:</strong> <span class="ok">Good—industry standard</span></p>
+            <p><strong>3-5%:</strong> <span class="warning">Concerning—investigate causes</span></p>
+            <p><strong>> 5%:</strong> <span class="danger">Critical—immediate intervention needed</span></p>
+        </div>
+        
+        <div class="metric-card">
+            <h4>Financial Impact</h4>
+            <p>Each LWBS patient represents:</p>
+            <ul>
+                <li><strong>Direct revenue loss:</strong> $300-$800 per visit (average $500)</li>
+                <li><strong>Downstream loss:</strong> Patient unlikely to return for future care</li>
+                <li><strong>Reputation damage:</strong> Negative reviews, reduced market share</li>
+                <li><strong>Litigation risk:</strong> Delayed diagnosis, adverse outcomes</li>
+            </ul>
+            <p><strong>Example:</strong> 8% LWBS at 150 patients/day = 12 LWBS/day × $500 = <strong>$6,000/day loss</strong> = $2.2M/year</p>
+        </div>
+        
+        <div class="metric-card">
+            <h4>Intervention Strategies</h4>
+            <p><strong>Capacity expansion:</strong> More physicians, NPs, PAs</p>
+            <p><strong>Fast-track systems:</strong> Separate low-acuity stream</p>
+            <p><strong>Patience extension:</strong> Communication, comfort, visible progress updates</p>
+            <p><strong>Demand smoothing:</strong> Urgent care partnerships, telehealth triage</p>
+            <p><strong>Process optimization:</strong> Reduce service times through lean methods</p>
+        </div>
+        
+        <div class="metric-card">
+            <h4>Clinical Risk</h4>
+            <p>LWBS patients who leave with undiagnosed conditions create medico-legal exposure. High-risk scenarios include:</p>
+            <ul>
+                <li>Chest pain → undiagnosed MI</li>
+                <li>Abdominal pain → appendicitis, ectopic pregnancy</li>
+                <li>Headache → subarachnoid hemorrhage, meningitis</li>
+                <li>Pediatric fever → sepsis</li>
+            </ul>
+            <p>Documentation of LWBS encounters and outreach attempts is critical for liability protection.</p>
+        </div>
+    </section>
+</div>
+
+<footer>
+    <p><strong>Chaos Lab</strong> • Reneging/Abandonment Model</p>
+    <p>All computation runs in your browser using Pyodide</p>
+</footer>
+
+<script>
+    let pyodide;
+
+    async function init() {
+        pyodide = await loadPyodide();
+        await pyodide.loadPackage(["numpy", "matplotlib"]);
+        document.getElementById('runBtn').disabled = false;
+        document.getElementById('runBtn').innerHTML = '<span>Execute Ensemble Simulation</span>';
+    }
+    init();
+
+    async function runSimulation() {
+        const btn = document.getElementById('runBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span>Processing 60 Realities</span><span class="loading-spinner"></span>';
+        
+        const params = {
+            lam: parseFloat(document.getElementById('lam').value),
+            mu: parseFloat(document.getElementById('mu').value),
+            c: parseInt(document.getElementById('servers').value),
+            patience: parseFloat(document.getElementById('patience').value),
+            shock: document.getElementById('shock_on').checked,
+            targetWait: parseFloat(document.getElementById('target_wait').value),
+            targetLoss: parseFloat(document.getElementById('target_loss').value)
+        };
+
+        if (params.lam <= 0 || params.mu <= 0 || params.c <= 0 || params.patience <= 0) {
+            alert('Please ensure all parameters are positive values.');
+            btn.disabled = false;
+            btn.innerHTML = '<span>Execute Ensemble Simulation</span>';
+            return;
+        }
+
+        await runReneging(params);
+        
+        btn.disabled = false;
+        btn.innerHTML = '<span>Execute Ensemble Simulation</span>';
+    }
+
+    async function runReneging(params) {
+        const code = `
+import numpy as np
+import matplotlib.pyplot as plt
+import io, base64
+
+def simulate_reneging(lam, mu, c, max_patience, is_shock):
+    t, dur = 0, 24
+    arrs = []
+    while t < dur:
+        l = lam * 5 if (is_shock and 10 <= t <= 12) else lam
+        t += np.random.exponential(1/l)
+        if t < dur:
+            arrs.append(t)
+    
+    free = [0.0] * c
+    waits = []
+    lost = 0
+    
+    for a_t in arrs:
+        free.sort()
+        start = max(a_t, free[0])
+        w = (start - a_t) * 60  # minutes
+        
+        # Patient abandons if wait exceeds patience
+        if (w/60) > max_patience:
+            lost += 1
+            continue
+        
+        free[0] = start + np.random.exponential(1/mu)
+        waits.append(w)
+    
+    avg_w = np.mean(waits) if waits else 0
+    lwbs_pct = (lost / len(arrs) * 100) if arrs else 0
+    return avg_w, lwbs_pct, waits
+
+n_sims = 60
+ensemble_waits = []
+ensemble_lwbs = []
+
+for _ in range(n_sims):
+    w, l, _ = simulate_reneging(${params.lam}, ${params.mu}, ${params.c}, ${params.patience}, ${params.shock})
+    ensemble_waits.append(w)
+    ensemble_lwbs.append(l)
+
+rec_c = ${params.c}
+found = False
+
+# Note: For reneging, even ρ > 1 can be "stable" due to abandonment
+for test_c in range(1, 21):
+    test_ws = []
+    test_ls = []
+    for _ in range(15):
+        w, l, _ = simulate_reneging(${params.lam}, ${params.mu}, test_c, ${params.patience}, False)
+        test_ws.append(w)
+        test_ls.append(l)
+    
+    if np.mean(test_ws) <= ${params.targetWait} and np.mean(test_ls) <= ${params.targetLoss}:
+        rec_c = test_c
+        found = True
+        break
+
+plt.style.use('default')
+fig, ax = plt.subplots(figsize=(11, 6))
+fig.patch.set_facecolor('#f8fafb')
+ax.set_facecolor('#ffffff')
+
+mean_wait = np.mean(ensemble_waits)
+mean_lwbs = np.mean(ensemble_lwbs)
+
+n, bins, patches = ax.hist(ensemble_waits, bins=min(30, max(15, len(ensemble_waits)//3)), 
+                            color='#4c1d95', edgecolor='white', alpha=0.85, linewidth=1.5)
+
+if len(patches) > 0:
+    for i, patch in enumerate(patches):
+        patch.set_facecolor(plt.cm.viridis(i / len(patches)))
+
+ax.axvline(mean_wait, color='#84cc16', lw=4, label=f'Mean: {mean_wait:.1f} min', linestyle='-', alpha=0.9)
+ax.axvline(${params.targetWait}, color='#6366f1', ls='--', lw=3, label=f'Target: ${params.targetWait} min', alpha=0.8)
+
+rho = ${params.lam} / (${params.c} * ${params.mu})
+ax.set_title(f'Reneging Queue: Wait Time Distribution (n={n_sims})\\nServers: ${params.c} | Patience: ${params.patience}hr | LWBS: {mean_lwbs:.1f}% | ρ = {rho:.2f}', 
+             fontsize=14, fontweight='bold', color='#1a0d2e', pad=20)
+ax.set_xlabel('Average Wait Time (Minutes)', fontsize=12, fontweight='bold', color='#2e1065')
+ax.set_ylabel('Frequency', fontsize=12, fontweight='bold', color='#2e1065')
+ax.legend(loc='upper right', fontsize=11)
+ax.grid(True, alpha=0.2)
+
+plt.tight_layout()
+buf = io.BytesIO()
+plt.savefig(buf, format='png', dpi=150, bbox_inches='tight')
+plt.close()
+img = base64.b64encode(buf.getvalue()).decode('utf-8')
+
+report = "═══════════════════════════════════════\\n"
+report += "  RENEGING QUEUE RESULTS\\n"
+report += "═══════════════════════════════════════\\n\\n"
+report += f"Configuration:\\n"
+report += f"  • Servers: ${params.c}\\n"
+report += f"  • Arrival Rate: ${params.lam}/hr\\n"
+report += f"  • Service Rate: ${params.mu}/hr\\n"
+report += f"  • Max Patience: ${params.patience}hr\\n"
+report += f"  • Utilization: {rho:.1%}"
+if rho >= 1.0:
+    report += " (stabilized by reneging)\\n"
+else:
+    report += "\\n"
+report += f"\\nPerformance (n={n_sims}):\\n"
+report += f"  • Mean Wait: {mean_wait:.1f} min\\n"
+report += f"  • Std Dev: {np.std(ensemble_waits):.1f} min\\n"
+report += f"  • LWBS Rate: {mean_lwbs:.2f}%"
+if mean_lwbs > 5:
+    report += " ⚠ High!\\n"
+else:
+    report += "\\n"
+report += f"  • 95th %ile: {np.percentile(ensemble_waits, 95):.1f} min\\n"
+
+shock_text = "YES (5× surge)" if ${params.shock} else "NO"
+report += f"\\nShock: {shock_text}\\n"
+
+# Revenue impact calculation
+daily_arrivals = ${params.lam} * 24
+daily_lwbs = daily_arrivals * (mean_lwbs / 100)
+annual_lwbs = daily_lwbs * 365
+revenue_per_visit = 500
+annual_loss = annual_lwbs * revenue_per_visit
+
+report += f"\\nRevenue Impact:\\n"
+report += f"  • Est. LWBS/day: {daily_lwbs:.1f}\\n"
+report += f"  • Annual loss (@$500/visit):\\n"
+report += f"    ${annual_loss:,.0f}\\n"
+
+if found:
+    rec_text = f"✓ RECOMMENDED: {rec_c} Servers\\n\\nMeets targets:\\n  • Wait ≤ ${params.targetWait} min\\n  • LWBS ≤ ${params.targetLoss}%"
+    savings = ${params.c} - rec_c
+    if savings > 0:
+        rec_text += f"\\n\\nOptimization: -{savings} server(s)"
+    elif savings < 0:
+        rec_text += f"\\n\\n⚠ Add {abs(savings)} server(s)"
+        reduction = ((mean_lwbs - ${params.targetLoss}) / 100) * daily_arrivals * 365 * revenue_per_visit
+        rec_text += f"\\n\\nPotential revenue recovery:\\n${reduction:,.0f}/year"
+else:
+    rec_text = "⚠ Target unreachable\\n\\nConsider:\\n• Capacity expansion\\n• Patience extension\\n• Fast-track systems"
+
+(report, img, rec_text)
+        `;
+
+        const [report, img, rec] = await pyodide.runPythonAsync(code);
+        document.getElementById('text-log').innerText = report;
+        document.getElementById('rec-box').innerText = rec;
+        document.getElementById('plot-img').src = "data:image/png;base64," + img;
+        document.getElementById('output-area').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>

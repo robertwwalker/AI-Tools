@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chaos Lab: Operations Science & Capacity Optimization</title>
-    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,12 +18,13 @@
             --purple-500: #7c3aed;
             --purple-400: #a78bfa;
             
-            /* Vibrant Green Accents */
-            --green-600: #059669;
-            --green-500: #10b981;
-            --green-400: #34d399;
-            --green-300: #6ee7b7;
-            --green-200: #a7f3d0;
+            /* Vibrant Lime Accents - High Contrast */
+            --lime-600: #65a30d;
+            --lime-500: #84cc16;
+            --lime-400: #a3e635;
+            --lime-300: #bef264;
+            --lime-200: #d9f99d;
+            --lime-bright: #d4ff00;
             
             /* Neutrals */
             --bg-primary: #f8fafb;
@@ -49,37 +49,95 @@
 
         body { 
             font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(180deg, var(--bg-primary) 0%, #e8f4f0 100%);
+            background: linear-gradient(180deg, var(--bg-primary) 0%, #f0fdf4 100%);
             color: var(--text-primary);
             line-height: 1.75;
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 40px 30px;
+            margin: 0;
+            padding: 0;
             min-height: 100vh;
         }
         
-        /* Header with Enhanced Visual Impact */
-        header { 
-            background: linear-gradient(135deg, var(--purple-900) 0%, var(--purple-700) 40%, var(--purple-600) 70%, var(--green-600) 100%);
+        /* Navigation */
+        nav {
+            background: linear-gradient(135deg, var(--purple-900) 0%, var(--purple-700) 100%);
+            padding: 1.5rem 0;
+            box-shadow: var(--shadow-lg);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        nav .logo {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--lime-bright);
+            text-decoration: none;
+            text-shadow: 0 2px 10px rgba(212, 255, 0, 0.3);
+        }
+
+        nav .nav-links {
+            display: flex;
+            gap: 25px;
+            flex-wrap: wrap;
+        }
+
+        nav a {
+            color: var(--lime-200);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            padding: 8px 16px;
+            border-radius: 8px;
+        }
+
+        nav a:hover {
+            color: var(--lime-bright);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        nav a.active {
+            color: var(--lime-bright);
+            background: rgba(212, 255, 0, 0.15);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 30px;
+        }
+        
+        /* Hero Header */
+        header.hero { 
+            background: linear-gradient(135deg, var(--purple-900) 0%, var(--purple-700) 40%, var(--purple-600) 70%, var(--lime-600) 100%);
             color: white;
-            padding: 5rem 3rem;
+            padding: 6rem 3rem;
             text-align: center;
-            border-radius: 20px;
-            margin-bottom: 60px;
-            box-shadow: var(--shadow-xl);
             position: relative;
             overflow: hidden;
             animation: headerFadeIn 1s ease-out;
+            margin-bottom: 60px;
         }
 
-        header::before {
+        header.hero::before {
             content: '';
             position: absolute;
             top: -50%;
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(212, 255, 0, 0.15) 0%, transparent 70%);
             animation: headerPulse 8s ease-in-out infinite;
         }
 
@@ -93,994 +151,354 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        header h1 {
+        header.hero h1 {
             font-family: 'Playfair Display', Georgia, serif;
-            font-size: 4rem;
+            font-size: 4.5rem;
             font-weight: 900;
-            margin-bottom: 0.5rem;
+            margin-bottom: 1rem;
             position: relative;
             z-index: 1;
             letter-spacing: -0.02em;
             text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
 
-        header p {
-            font-size: 1.4rem;
+        header.hero .highlight {
+            color: var(--lime-bright);
+            text-shadow: 0 0 20px rgba(212, 255, 0, 0.5);
+        }
+
+        header.hero p {
+            font-size: 1.5rem;
             font-weight: 300;
             letter-spacing: 0.05em;
             position: relative;
             z-index: 1;
             opacity: 0.95;
-            max-width: 800px;
-            margin: 0 auto;
+            max-width: 900px;
+            margin: 0 auto 2rem auto;
         }
 
-        /* Enhanced Section Cards */
-        .section-card { 
+        header.hero .subtitle {
+            font-size: 1.2rem;
+            color: var(--lime-200);
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Model Cards Grid */
+        .models-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 40px;
+            margin: 60px 0;
+        }
+
+        .model-card {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: var(--shadow-md);
+            border-left: 6px solid var(--lime-500);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .model-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, var(--purple-700) 0%, var(--lime-500) 100%);
+        }
+
+        .model-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-xl);
+            border-left-color: var(--lime-bright);
+        }
+
+        .model-card h3 {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 2rem;
+            color: var(--purple-800);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .model-card .icon {
+            font-size: 2.5rem;
+        }
+
+        .model-card .model-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1rem;
+            color: var(--lime-600);
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .model-card p {
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            line-height: 1.8;
+        }
+
+        .model-card .use-cases {
+            background: linear-gradient(135deg, #faf5ff 0%, #f7fee7 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 3px solid var(--lime-500);
+        }
+
+        .model-card .use-cases strong {
+            display: block;
+            color: var(--purple-700);
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+
+        .model-card .use-cases ul {
+            margin: 10px 0 0 20px;
+            color: var(--text-secondary);
+        }
+
+        .model-card .use-cases li {
+            margin: 5px 0;
+        }
+
+        .model-card .btn {
+            display: inline-block;
+            padding: 14px 32px;
+            background: linear-gradient(135deg, var(--purple-700) 0%, var(--lime-600) 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-sm);
+            margin-top: 10px;
+        }
+
+        .model-card .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            background: linear-gradient(135deg, var(--purple-600) 0%, var(--lime-500) 100%);
+        }
+
+        /* Introduction Section */
+        .intro-section {
             background: var(--bg-secondary);
             padding: 50px;
             border-radius: 16px;
             box-shadow: var(--shadow-md);
             margin-bottom: 50px;
-            border-left: 6px solid var(--green-500);
-            transition: all 0.3s ease;
-            animation: cardSlideIn 0.6s ease-out backwards;
+            border-left: 6px solid var(--lime-500);
         }
 
-        .section-card:nth-child(1) { animation-delay: 0.1s; }
-        .section-card:nth-child(2) { animation-delay: 0.2s; }
-        .section-card:nth-child(3) { animation-delay: 0.3s; }
-        .section-card:nth-child(4) { animation-delay: 0.4s; }
-
-        @keyframes cardSlideIn {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .section-card:hover {
-            box-shadow: var(--shadow-lg);
-            transform: translateY(-4px);
-        }
-
-        h2 { 
+        .intro-section h2 {
             font-family: 'Playfair Display', Georgia, serif;
             color: var(--purple-800);
             font-size: 2.5rem;
             font-weight: 900;
-            border-bottom: 3px solid var(--green-400);
+            border-bottom: 3px solid var(--lime-400);
             padding-bottom: 15px;
-            margin: 0 0 30px 0;
-            letter-spacing: -0.01em;
+            margin-bottom: 30px;
         }
 
-        h3 { 
-            color: var(--green-600);
-            font-size: 1.6rem;
-            margin: 35px 0 20px 0;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        h3::before {
-            content: '▸';
-            color: var(--green-500);
-            font-size: 1.4rem;
-        }
-
-        p {
-            font-size: 1.1rem;
-            margin-bottom: 20px;
+        .intro-section p {
+            font-size: 1.15rem;
             color: var(--text-secondary);
+            margin-bottom: 20px;
             line-height: 1.8;
         }
 
-        strong {
+        .intro-section strong {
             color: var(--purple-700);
             font-weight: 700;
         }
 
-        em {
-            color: var(--green-600);
+        .intro-section em {
+            color: var(--lime-600);
             font-style: normal;
             font-weight: 600;
         }
 
-        /* Enhanced Math Boxes */
-        .math-box { 
-            background: linear-gradient(135deg, #faf5ff 0%, #f0fdf4 100%);
-            padding: 35px;
-            border-radius: 12px;
-            margin: 30px 0;
-            border: 2px solid var(--green-300);
-            box-shadow: var(--shadow-sm);
-            overflow-x: auto;
-            font-size: 1.2rem;
-            position: relative;
-        }
-
-        .math-box::before {
-            content: '∫';
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            font-size: 3rem;
-            color: var(--purple-400);
-            opacity: 0.15;
-            font-family: 'Times New Roman', serif;
-        }
-
-        /* Contextual Info Boxes */
-        .info-box {
-            background: linear-gradient(135deg, #ecfdf5 0%, #f0fdfa 100%);
-            border-left: 5px solid var(--green-500);
-            padding: 25px;
-            border-radius: 10px;
-            margin: 25px 0;
-            font-size: 1.05rem;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .info-box strong {
-            color: var(--green-600);
-            display: block;
-            margin-bottom: 10px;
-            font-size: 1.1rem;
-        }
-
-        .warning-box {
-            background: linear-gradient(135deg, #fef3c7 0%, #fef9e7 100%);
-            border-left: 5px solid #f59e0b;
-            padding: 25px;
-            border-radius: 10px;
-            margin: 25px 0;
-            font-size: 1.05rem;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .warning-box strong {
-            color: #d97706;
-            display: block;
-            margin-bottom: 10px;
-            font-size: 1.1rem;
-        }
-
-        /* Interactive Lab UI - Premium Design */
-        .lab-ui { 
-            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
-            padding: 45px;
-            border-radius: 20px;
-            border: 2px solid var(--border-color);
-            margin-bottom: 60px;
-            box-shadow: var(--shadow-lg);
-            position: relative;
-        }
-
-        .lab-ui::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 6px;
-            background: linear-gradient(90deg, var(--purple-700) 0%, var(--green-500) 100%);
-            border-radius: 20px 20px 0 0;
-        }
-
-        .lab-title {
-            font-family: 'Playfair Display', Georgia, serif;
-            font-size: 2rem;
-            color: var(--purple-800);
-            margin-bottom: 30px;
-            padding-top: 10px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .lab-title::before {
-            content: '⚡';
-            font-size: 2.5rem;
-        }
-
-        /* Tabs with Enhanced Styling */
-        .tabs { 
-            display: flex;
-            gap: 12px;
-            margin-bottom: 35px;
-            overflow-x: auto;
-            padding-bottom: 8px;
-        }
-
-        .tab-btn { 
-            padding: 14px 28px;
-            border: 2px solid var(--purple-400);
-            border-radius: 50px;
-            cursor: pointer;
-            font-weight: 600;
-            background: var(--bg-secondary);
-            color: var(--purple-700);
-            transition: all 0.3s ease;
-            white-space: nowrap;
-            font-size: 0.95rem;
-            font-family: 'IBM Plex Mono', monospace;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .tab-btn:hover {
-            background: var(--purple-100);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .tab-btn.active { 
-            background: linear-gradient(135deg, var(--purple-700) 0%, var(--purple-600) 100%);
-            color: white;
-            border-color: var(--purple-700);
-            box-shadow: 0 4px 15px rgba(76, 29, 149, 0.4);
-        }
-        
-        /* Control Grid */
-        .control-grid { 
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 25px;
-            margin-bottom: 30px;
-        }
-
-        .control-group {
-            position: relative;
-        }
-
-        .control-group label { 
-            display: block;
-            font-weight: 700;
-            margin-bottom: 10px;
-            color: var(--purple-700);
-            font-size: 0.95rem;
-            font-family: 'IBM Plex Mono', monospace;
-        }
-
-        .control-group input { 
-            width: 100%;
-            padding: 14px 18px;
-            border: 2px solid var(--border-color);
-            border-radius: 10px;
-            font-size: 1.05rem;
-            box-sizing: border-box;
-            background: var(--bg-secondary);
-            transition: all 0.3s ease;
-            font-family: 'IBM Plex Mono', monospace;
-        }
-
-        .control-group input:focus {
-            outline: none;
-            border-color: var(--green-500);
-            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
-        }
-
-        .control-group input:hover {
-            border-color: var(--green-400);
-        }
-
-        /* Shock Bar with Enhanced Styling */
-        .shock-bar { 
-            background: linear-gradient(135deg, #fff7ed 0%, #fef2f2 100%);
-            padding: 25px;
-            border-radius: 12px;
-            border: 2px dashed #f97316;
-            margin-bottom: 30px;
-            display: flex;
-            align-items: center;
-            gap: 18px;
-            font-weight: 700;
-            color: #ea580c;
-            box-shadow: var(--shadow-sm);
-            transition: all 0.3s ease;
-        }
-
-        .shock-bar:hover {
-            background: linear-gradient(135deg, #ffedd5 0%, #fee2e2 100%);
-            box-shadow: var(--shadow-md);
-        }
-
-        .shock-bar input[type="checkbox"] { 
-            transform: scale(1.8);
-            cursor: pointer;
-            accent-color: #ea580c;
-        }
-
-        .shock-bar label {
-            cursor: pointer;
-            font-size: 1.05rem;
-        }
-
-        /* Recommendation Target Section */
-        .recommendation-target { 
-            background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);
-            padding: 30px;
-            border-radius: 12px;
-            border: 2px solid var(--green-400);
-            margin-bottom: 30px;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .recommendation-target > strong {
-            display: block;
-            color: var(--purple-800);
-            font-size: 1.2rem;
-            margin-bottom: 20px;
-            font-family: 'Playfair Display', Georgia, serif;
-        }
-
-        /* Enhanced Run Button */
-        button#runBtn { 
-            width: 100%;
-            padding: 28px;
-            background: linear-gradient(135deg, var(--purple-700) 0%, var(--purple-600) 50%, var(--green-600) 100%);
-            color: white;
-            border: none;
-            border-radius: 14px;
-            font-size: 1.4rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.4s ease;
-            box-shadow: 0 8px 25px rgba(76, 29, 149, 0.35);
-            font-family: 'Source Sans Pro', sans-serif;
-            letter-spacing: 0.02em;
-            position: relative;
-            overflow: hidden;
-        }
-
-        button#runBtn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-
-        button#runBtn:hover::before {
-            width: 400px;
-            height: 400px;
-        }
-
-        button#runBtn:hover { 
-            transform: translateY(-3px);
-            box-shadow: 0 12px 35px rgba(76, 29, 149, 0.45);
-        }
-
-        button#runBtn:active {
-            transform: translateY(-1px);
-        }
-
-        button#runBtn:disabled { 
-            background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
-            cursor: not-allowed;
-            box-shadow: none;
-            opacity: 0.7;
-        }
-
-        /* Output Area */
-        #output-area { 
-            display: none;
-            margin-top: 50px;
-            animation: outputFadeIn 0.8s ease-out;
-        }
-
-        @keyframes outputFadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .res-grid { 
-            display: grid;
-            grid-template-columns: 1fr 1.5fr;
-            gap: 40px;
-        }
-
-        #text-log { 
-            background: linear-gradient(135deg, var(--purple-900) 0%, #1e293b 100%);
-            color: var(--green-300);
-            padding: 30px;
-            border-radius: 12px;
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 1rem;
-            line-height: 1.7;
-            box-shadow: var(--shadow-lg);
-            border: 2px solid var(--green-600);
-            white-space: pre-wrap;
-        }
-
-        #rec-box { 
-            background: linear-gradient(135deg, var(--bg-secondary) 0%, #ecfdf5 100%);
-            color: var(--purple-800);
-            border: 3px solid var(--green-500);
-            padding: 30px;
-            border-radius: 12px;
-            margin-top: 25px;
-            font-weight: 700;
+        /* Footer */
+        footer {
+            background: linear-gradient(135deg, var(--purple-900) 0%, var(--purple-800) 100%);
+            color: var(--lime-200);
+            padding: 40px 30px;
             text-align: center;
-            font-size: 1.3rem;
-            box-shadow: var(--shadow-md);
-            font-family: 'Playfair Display', Georgia, serif;
+            margin-top: 80px;
         }
 
-        .img-wrap {
-            background: var(--bg-secondary);
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: var(--shadow-md);
+        footer p {
+            margin: 10px 0;
+            color: var(--lime-200);
         }
 
-        .img-wrap img { 
-            width: 100%;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        footer a {
+            color: var(--lime-bright);
+            text-decoration: none;
+            font-weight: 600;
         }
 
-        /* Responsive Design */
-        @media (max-width: 1024px) { 
-            .res-grid { grid-template-columns: 1fr; }
-            header h1 { font-size: 3rem; }
-            header p { font-size: 1.2rem; }
+        footer a:hover {
+            text-decoration: underline;
         }
 
+        /* Responsive */
         @media (max-width: 768px) {
-            body { padding: 20px 15px; }
-            header { padding: 3rem 2rem; }
-            header h1 { font-size: 2.5rem; }
-            .section-card { padding: 30px; }
-            .lab-ui { padding: 30px; }
-            h2 { font-size: 2rem; }
-        }
-
-        /* Loading Animation */
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .loading-spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin-left: 10px;
-            vertical-align: middle;
-        }
-
-        /* Scrollbar Styling */
-        ::-webkit-scrollbar {
-            width: 12px;
-            height: 12px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--bg-tertiary);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--purple-400);
-            border-radius: 6px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--purple-600);
+            header.hero h1 { font-size: 3rem; }
+            header.hero p { font-size: 1.2rem; }
+            .models-grid { grid-template-columns: 1fr; }
+            .container { padding: 20px 15px; }
+            nav .container { flex-direction: column; align-items: flex-start; }
         }
     </style>
 </head>
 <body>
 
-<header>
-    <h1>The Calculus of Chaos</h1>
+<nav>
+    <div class="container">
+        <a href="index.html" class="logo">Chaos Lab</a>
+        <div class="nav-links">
+            <a href="index.html" class="active">Home</a>
+            <a href="mmc.html">M/M/c Standard</a>
+            <a href="circular.html">Finite Capacity</a>
+            <a href="priority.html">Priority Queue</a>
+            <a href="reneging.html">Reneging</a>
+        </div>
+    </div>
+</nav>
+
+<header class="hero">
+    <h1>The <span class="highlight">Calculus of Chaos</span></h1>
     <p>Advanced Capacity Optimization & Stochastic Simulation for High-Stakes Healthcare Systems</p>
+    <p class="subtitle">Interactive Laboratory for Queueing Theory & Operations Research</p>
 </header>
 
-<section class="section-card">
-    <h2>1. The General Service Problem</h2>
-    
-    <p>The <strong>General Service Problem</strong> is one of the most fundamental challenges in operations research and healthcare management. At its core, it recognizes that total system cost represents the delicate balance between two competing forces: <em>Capacity Costs</em> (the expense of maintaining staff, equipment, and infrastructure) and <em>Waiting Costs</em> (the human suffering, lost revenue, and system inefficiency that results from insufficient capacity).</p>
-    
-    <div class="info-box">
-        <strong>🔬 The Stochastic Nature of Arrivals</strong>
-        Because patient arrival patterns follow a <strong>Poisson Process</strong>, they exhibit a natural "clumping" behavior. This means arrivals are not evenly distributed across time—instead, they arrive in random bursts. This inherent variability is what makes capacity planning so challenging and why simple "average-based" approaches consistently fail in real-world scenarios.
-    </div>
-    
-    <p>This phenomenon creates a counterintuitive reality: <strong>variability causes queues to form even when average capacity exceeds average demand</strong>. A hospital with 10 doctors serving 8 patients per hour on average will still experience waiting times and backlogs due to the random clustering of arrivals and service completions.</p>
-    
-    <p>We formalize the system's behavior through the <strong>Stability Criterion</strong>, which defines whether a queueing system will reach steady-state equilibrium or spiral into infinite growth:</p>
-    
-    <div class="math-box">
-        $$\rho = \frac{\lambda}{c \mu} < 1$$
-    </div>
-    
-    <p>Where:</p>
-    <ul style="margin: 20px 0 20px 40px; color: var(--text-secondary);">
-        <li><strong>λ</strong> (lambda) = arrival rate (patients per hour)</li>
-        <li><strong>c</strong> = number of servers (doctors, nurses, beds)</li>
-        <li><strong>μ</strong> (mu) = service rate per server (patients served per hour per server)</li>
-        <li><strong>ρ</strong> (rho) = utilization factor</li>
-    </ul>
-    
-    <div class="warning-box">
-        <strong>⚠️ Critical Threshold</strong>
-        If ρ ≥ 1, the system becomes non-stationary—the queue will grow indefinitely over time. No amount of optimization can stabilize an overloaded system. This is a hard physical constraint.
-    </div>
-    
-    <p>Our simulation laboratory helps you discover the <strong>"Elbow Point"</strong>—the optimal capacity level where adding one more server provides the maximum marginal reduction in system volatility and waiting time variance. Beyond this point, additional capacity yields diminishing returns.</p>
-</section>
+<div class="container">
+    <section class="intro-section">
+        <h2>Welcome to the Operations Science Laboratory</h2>
+        
+        <p>This interactive laboratory provides hands-on exploration of <strong>queueing theory</strong> and <em>capacity optimization</em> through browser-based stochastic simulation. All computation runs entirely in your browser using Python (via Pyodide) with no server dependencies.</p>
+        
+        <p>Healthcare systems face a fundamental challenge: <strong>arrivals follow a Poisson process</strong>, exhibiting natural "clumping" that creates queues even when average capacity exceeds average demand. Traditional planning methods that rely on simple averages fail catastrophically in these environments.</p>
+        
+        <p>Through <em>ensemble simulation</em> (60+ parallel realities), we capture the full spectrum of operational volatility and identify optimal capacity configurations that balance waiting costs against staffing costs.</p>
+        
+        <p><strong>Each model below addresses a specific operational scenario:</strong></p>
+    </section>
 
-<section class="section-card">
-    <h2>2. Mathematical Models & Recurrence Relations</h2>
-
-    <h3>A. The M/M/c Queue Derivation</h3>
-    
-    <p>The M/M/c queue (Markovian arrivals, Markovian service, c servers) is the foundational model for multi-server systems. The cornerstone of all M/M/c calculations is <strong>P₀</strong>, the probability that all servers are idle—a deceptively simple quantity that requires solving a complex balance equation.</p>
-    
-    <div class="math-box">
-        $$P_0 = \left[ \sum_{n=0}^{c-1} \frac{(c\rho)^n}{n!} + \frac{(c\rho)^c}{c!(1-\rho)} \right]^{-1}$$
-    </div>
-    
-    <div class="info-box">
-        <strong>💡 Understanding P₀</strong>
-        This formula represents the normalization constant ensuring all state probabilities sum to 1. The first term captures states where fewer than c customers are in the system (some servers idle), while the second term accounts for the infinite series of states where all servers are busy and a queue has formed.
-    </div>
-    
-    <p>From P₀, we can derive all other performance metrics: average queue length (L<sub>q</sub>), average wait time (W<sub>q</sub>), and system utilization. The <strong>Erlang C formula</strong>, which calculates the probability that an arriving customer must wait, is directly derived from this foundation.</p>
-
-    <h3>B. Circular Queue (M/M/c/K) with Finite Capacity</h3>
-    
-    <p>Real-world systems have physical constraints. Emergency departments have a maximum number of beds; call centers have finite buffer capacity. The <strong>M/M/c/K model</strong> extends the infinite-capacity queue by introducing a maximum system capacity K.</p>
-    
-    <p>The critical metric here is the <strong>Blocking Probability</strong> (P<sub>B</sub>), which quantifies how often patients are diverted, calls are dropped, or customers are turned away because the system has reached maximum capacity:</p>
-    
-    <div class="math-box">
-        $$P_B = P_K = P_0 \frac{(c\rho)^K}{c! \cdot c^{K-c}}$$
-    </div>
-    
-    <div class="info-box">
-        <strong>🏥 Clinical Application</strong>
-        In emergency medicine, blocking probability translates directly to ambulance diversion rates. A hospital operating at 95% capacity with K=50 beds might divert 15-20% of arriving ambulances during peak hours, forcing patients to travel further for care and increasing regional system strain.
-    </div>
-
-    <h3>C. Priority Queue (Non-Preemptive Triage)</h3>
-    
-    <p>Priority queuing systems recognize that not all customers are equal. In healthcare, this manifests as triage systems where critical patients (Class 1) receive preferential treatment over stable patients (Class 2).</p>
-    
-    <p>The key insight: <strong>priority systems don't create capacity—they redistribute waiting time variance</strong>. Reducing wait for Class 1 patients comes at the direct expense of Class 2 patients, who absorb the "variance burden":</p>
-    
-    <div class="math-box">
-        $$W_{\text{class 2}} = \frac{E[S^2]\lambda}{2(1-\rho_1)(1-\rho_1-\rho_2)}$$
-    </div>
-    
-    <p>Where:</p>
-    <ul style="margin: 20px 0 20px 40px; color: var(--text-secondary);">
-        <li><strong>E[S²]</strong> = second moment of service time (variance measure)</li>
-        <li><strong>ρ₁</strong> = utilization from high-priority arrivals</li>
-        <li><strong>ρ₂</strong> = utilization from low-priority arrivals</li>
-    </ul>
-    
-    <div class="warning-box">
-        <strong>⚠️ The Priority Paradox</strong>
-        The denominator (1-ρ₁)(1-ρ₁-ρ₂) reveals a dangerous nonlinearity: as system load increases, low-priority wait times explode exponentially. At 80% total utilization, Class 2 patients might wait 5x longer than Class 1. At 90%, this ratio can exceed 20x.
-    </div>
-
-    <h3>D. Abandonment/Reneging Model</h3>
-    
-    <p>The <strong>M/M/c+G queue</strong> (where +G represents "generally distributed patience") models customer churn. In healthcare, this represents patients who leave without being seen (LWBS) when wait times exceed their tolerance threshold.</p>
-    
-    <p>A patient abandons the queue if their perceived wait time W exceeds their individual patience threshold T. The distribution of patience thresholds fundamentally alters system dynamics—a patient population with low patience creates a self-regulating system where extreme queues are capped by abandonment, but at the cost of lost revenue and poor health outcomes.</p>
-    
-    <div class="info-box">
-        <strong>📊 Empirical Patience Distributions</strong>
-        Research shows emergency department patience follows approximately exponential or Weibull distributions, with median patience around 60-90 minutes. However, this varies dramatically by acuity level and demographic factors. Pediatric patients and chest pain presentations show higher patience; minor injuries show lower patience.
-    </div>
-</section>
-
-<section class="section-card">
-    <h2>3. Shock Theory & Transient Dynamics</h2>
-    
-    <p>Traditional queueing theory assumes steady-state equilibrium—a system that has settled into statistical regularity. But real operational systems experience <strong>System Shocks</strong>: transient periods where arrival rates temporarily overwhelm capacity.</p>
-    
-    <p>During a shock event, where λ(t) ≫ cμ, classical metrics like "average wait time" become not just inaccurate but actively misleading. The system is building a deterministic backlog, and what matters is <strong>Recovery Time</strong>—how long it takes to clear the surge and return to normal operations.</p>
-    
-    <div class="math-box">
-        $$T_{\text{recovery}} = \frac{Q_{\text{backlog}}}{c\mu - \lambda_{\text{baseline}}}$$
-    </div>
-    
-    <p>Where:</p>
-    <ul style="margin: 20px 0 20px 40px; color: var(--text-secondary);">
-        <li><strong>Q<sub>backlog</sub></strong> = queue depth at shock conclusion</li>
-        <li><strong>cμ</strong> = total system service capacity</li>
-        <li><strong>λ<sub>baseline</sub></strong> = arrival rate after shock subsides</li>
-    </ul>
-    
-    <div class="info-box">
-        <strong>🌊 Real-World Shocks</strong>
-        <ul style="margin: 10px 0 0 20px;">
-            <li><strong>Mass Casualty Events:</strong> Traffic accidents, natural disasters, active shooter situations</li>
-            <li><strong>Seasonal Surges:</strong> Flu season, holiday injuries, heat waves</li>
-            <li><strong>System Cascades:</strong> Neighboring ED closures forcing patient redistribution</li>
-            <li><strong>Scheduled Chaos:</strong> Post-concert/sporting event arrivals, shift change transitions</li>
-        </ul>
-    </div>
-    
-    <p>The shock recovery formula reveals a critical insight: <strong>recovery time is hypersensitive to the difference between capacity and baseline demand</strong>. A system operating at 85% baseline utilization (leaving only 15% excess capacity) takes 6.7x longer to recover from a shock than a system at 70% utilization (30% excess capacity).</p>
-    
-    <div class="warning-box">
-        <strong>⚠️ The Fragility Threshold</strong>
-        Systems operating above 90% baseline utilization effectively cannot recover from shocks within a single operational period. A 2-hour surge at 9 AM can create wait time effects that persist past midnight. This is why emergency departments target 80-85% utilization rather than 95%—the extra 10-15% idle capacity is shock insurance.
-    </div>
-</section>
-
-<div class="lab-ui">
-    <div class="lab-title">Interactive Simulation Laboratory</div>
-    
-    <div class="tabs">
-        <button class="tab-btn active" onclick="setModel('mmc')">M/M/c Standard</button>
-        <button class="tab-btn" onclick="setModel('circular')">Circular (Finite Beds)</button>
-        <button class="tab-btn" onclick="setModel('priority')">Priority (Triage)</button>
-        <button class="tab-btn" onclick="setModel('deque')">Deque (Reneging)</button>
-    </div>
-
-    <div class="control-grid">
-        <div class="control-group">
-            <label>Arrivals (λ/hr)</label>
-            <input type="number" id="lam" value="10" step="0.5" min="0">
-        </div>
-        <div class="control-group">
-            <label>Service (μ/hr/Server)</label>
-            <input type="number" id="mu" value="4" step="0.25" min="0.1">
-        </div>
-        <div class="control-group">
-            <label>Current Servers (c)</label>
-            <input type="number" id="servers" value="3" step="1" min="1">
-        </div>
-        <div class="control-group">
-            <label id="extra-label">Sim Iterations</label>
-            <input type="number" id="extra-val" value="50" step="5" min="10">
-        </div>
-    </div>
-
-    <div class="recommendation-target">
-        <strong>Capacity Optimizer Targets</strong>
-        <div class="control-grid" style="margin-top:15px;">
-            <div class="control-group">
-                <label>Target Max Wait (min)</label>
-                <input type="number" id="target_wait" value="20" step="5" min="5">
+    <div class="models-grid">
+        <!-- M/M/c Standard -->
+        <div class="model-card">
+            <div class="icon">∞</div>
+            <h3>M/M/c Standard Queue</h3>
+            <span class="model-label">INFINITE CAPACITY MODEL</span>
+            
+            <p>The foundational multi-server queue with Poisson arrivals and exponential service times. Assumes unlimited waiting capacity—the theoretical baseline for all queueing analysis.</p>
+            
+            <div class="use-cases">
+                <strong>🏥 Clinical Applications:</strong>
+                <ul>
+                    <li>Emergency department physician staffing</li>
+                    <li>Operating room scheduling optimization</li>
+                    <li>Outpatient clinic capacity planning</li>
+                    <li>Radiology service configuration</li>
+                </ul>
             </div>
-            <div class="control-group">
-                <label>Acceptable Loss (%)</label>
-                <input type="number" id="target_loss" value="5" step="1" min="0" max="100">
-            </div>
+            
+            <p><strong>Key Insight:</strong> Utilization (ρ) must stay below 100% for stability. At 90% utilization, wait times become highly volatile. The "elbow" typically occurs around 75-80% utilization.</p>
+            
+            <a href="mmc.html" class="btn">Explore M/M/c Model →</a>
         </div>
-    </div>
 
-    <div class="shock-bar">
-        <input type="checkbox" id="shock_on">
-        <label for="shock_on">🚨 SIMULATE SYSTEM SHOCK (5× Arrivals for 2 Hours at Hour 10)</label>
-    </div>
-
-    <button id="runBtn" onclick="runEnsemble()" disabled>
-        <span>Initializing Python Computation Engine...</span>
-    </button>
-
-    <div id="output-area">
-        <div class="res-grid">
-            <div>
-                <div id="text-log"></div>
-                <div id="rec-box"></div>
+        <!-- Circular/Finite -->
+        <div class="model-card">
+            <div class="icon">🔄</div>
+            <h3>Finite Capacity (M/M/c/K)</h3>
+            <span class="model-label">BLOCKING PROBABILITY MODEL</span>
+            
+            <p>Extends M/M/c with a maximum system capacity K. When K patients are in the system (served + waiting), new arrivals are rejected or diverted. Critical for resource-constrained environments.</p>
+            
+            <div class="use-cases">
+                <strong>🏥 Clinical Applications:</strong>
+                <ul>
+                    <li>Inpatient bed management (fixed bed count)</li>
+                    <li>ICU capacity with hard limits</li>
+                    <li>Ambulance diversion protocols</li>
+                    <li>Boarding and overflow management</li>
+                </ul>
             </div>
-            <div class="img-wrap">
-                <img id="plot-img" src="" alt="Simulation Results" />
+            
+            <p><strong>Key Insight:</strong> Blocking probability (P<sub>B</sub>) rises exponentially near capacity. Operating at >90% of K creates cascading regional failures as diverted patients overwhelm neighboring facilities.</p>
+            
+            <a href="circular.html" class="btn">Explore M/M/c/K Model →</a>
+        </div>
+
+        <!-- Priority -->
+        <div class="model-card">
+            <div class="icon">⚡</div>
+            <h3>Priority Queue (Triage)</h3>
+            <span class="model-label">NON-PREEMPTIVE PRIORITY MODEL</span>
+            
+            <p>Implements triage logic where high-priority patients receive preferential service. Does not interrupt service-in-progress (non-preemptive). Redistributes variance—reduces wait for critical, increases wait for stable.</p>
+            
+            <div class="use-cases">
+                <strong>🏥 Clinical Applications:</strong>
+                <ul>
+                    <li>Emergency severity index (ESI) triage</li>
+                    <li>Trauma activation protocols</li>
+                    <li>STEMI/stroke fast-track pathways</li>
+                    <li>Urgent vs. routine surgical scheduling</li>
+                </ul>
             </div>
+            
+            <p><strong>Key Insight:</strong> Priority systems don't create capacity—they shift variance. Low-priority wait times can explode to 10-20× high-priority waits at high utilization. Requires careful equity considerations.</p>
+            
+            <a href="priority.html" class="btn">Explore Priority Model →</a>
+        </div>
+
+        <!-- Reneging -->
+        <div class="model-card">
+            <div class="icon">🚪</div>
+            <h3>Reneging/Abandonment</h3>
+            <span class="model-label">PATIENCE-LIMITED MODEL</span>
+            
+            <p>Models customer abandonment when wait times exceed individual patience thresholds. Patients leave without service (LWBS), creating revenue loss and poor outcomes. Self-regulating but costly.</p>
+            
+            <div class="use-cases">
+                <strong>🏥 Clinical Applications:</strong>
+                <ul>
+                    <li>Left without being seen (LWBS) rates</li>
+                    <li>Walk-in clinic patient retention</li>
+                    <li>Call center abandonment optimization</li>
+                    <li>Online check-in dropout prevention</li>
+                </ul>
+            </div>
+            
+            <p><strong>Key Insight:</strong> Abandonment creates a "pressure relief valve" that prevents infinite queues, but represents system failure. Each LWBS patient is lost revenue, poor outcomes, and potential litigation risk.</p>
+            
+            <a href="reneging.html" class="btn">Explore Reneging Model →</a>
         </div>
     </div>
 </div>
 
-<section class="section-card">
-    <h2>4. Interpretation Guide & Strategic Insights</h2>
-    
-    <h3>Understanding Your Results</h3>
-    
-    <p>The simulation generates an <strong>ensemble distribution</strong> of 60+ parallel realities, each representing a statistically valid outcome given your input parameters. This approach captures the full spectrum of operational volatility.</p>
-    
-    <div class="info-box">
-        <strong>📈 Key Metrics Explained</strong>
-        <ul style="margin: 10px 0 0 20px;">
-            <li><strong>Ensemble Mean:</strong> The "typical" wait time across all simulated realities</li>
-            <li><strong>Distribution Spread:</strong> The width of the histogram reveals operational volatility—narrow distributions indicate predictable performance; wide distributions signal high variability</li>
-            <li><strong>Target Line:</strong> Your operational goal; the percentage of the distribution exceeding this line represents failure probability</li>
-            <li><strong>System Loss Rate:</strong> Percentage of patients diverted, abandoned, or denied service</li>
-        </ul>
-    </div>
-    
-    <h3>The Capacity Recommender Algorithm</h3>
-    
-    <p>The system tests configurations from 1 to 20 servers, seeking the minimum capacity that satisfies both constraints:</p>
-    <ul style="margin: 20px 0 20px 40px; color: var(--text-secondary);">
-        <li>Average wait time ≤ Target Wait</li>
-        <li>Loss rate ≤ Acceptable Loss</li>
-        <li>Utilization ρ < 1.0 (stability criterion)</li>
-    </ul>
-    
-    <p>If no configuration within the search range satisfies your constraints, the system indicates that demand exceeds reasonable capacity scaling—a signal that demand management (diversion protocols, referral networks) or service time reduction (process optimization, technology) may be necessary.</p>
-    
-    <h3>Strategic Applications</h3>
-    
-    <p><strong>Staffing Optimization:</strong> Use the tool to determine minimum safe staffing levels for different shift periods. Morning shifts with λ=15/hr require different capacity than overnight shifts with λ=6/hr.</p>
-    
-    <p><strong>Business Case Development:</strong> The capacity recommender provides evidence-based justification for resource requests. Showing that 3 servers yield 35-minute waits while 4 servers yield 12-minute waits creates clear ROI narratives.</p>
-    
-    <p><strong>Shock Preparedness:</strong> Enable shock simulation to stress-test your current capacity against surge scenarios. A configuration that performs well under normal load may completely fail during a 2-hour 5× surge, revealing dangerous fragility.</p>
-    
-    <div class="warning-box">
-        <strong>⚠️ Model Limitations</strong>
-        This tool assumes exponentially distributed service times and memoryless arrivals (Poisson process). Real systems exhibit time-of-day patterns, day-of-week effects, and service time correlation with patient complexity. Treat recommendations as lower bounds—real-world systems typically require 10-15% additional capacity buffer to account for unmodeled complexity.
-    </div>
-</section>
-
-<script>
-    let pyodide;
-    let currentModel = 'mmc';
-
-    async function init() {
-        try {
-            pyodide = await loadPyodide();
-            await pyodide.loadPackage(["numpy", "matplotlib"]);
-            const btn = document.getElementById('runBtn');
-            btn.disabled = false;
-            btn.innerHTML = '<span>Execute Ensemble Simulation</span>';
-        } catch (error) {
-            console.error('Failed to initialize Pyodide:', error);
-            document.getElementById('runBtn').innerHTML = '<span>Initialization Failed - Please Refresh</span>';
-        }
-    }
-    init();
-
-    function setModel(m) {
-        currentModel = m;
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        event.target.classList.add('active');
-        
-        const label = document.getElementById('extra-label');
-        const input = document.getElementById('extra-val');
-        
-        if (m === 'circular') {
-            label.innerText = "Max Capacity (K)";
-            input.value = 20;
-        } else if (m === 'priority') {
-            label.innerText = "% High Priority";
-            input.value = 30;
-        } else if (m === 'deque') {
-            label.innerText = "Max Patience (Hr)";
-            input.value = 1.5;
-        } else {
-            label.innerText = "Sim Iterations";
-            input.value = 50;
-        }
-    }
-
-    async function runEnsemble() {
-        const btn = document.getElementById('runBtn');
-        btn.disabled = true;
-        btn.innerHTML = '<span>Processing Ensemble Across 60+ Realities</span><span class="loading-spinner"></span>';
-        
-        const params = {
-            lam: parseFloat(document.getElementById('lam').value),
-            mu: parseFloat(document.getElementById('mu').value),
-            c: parseInt(document.getElementById('servers').value),
-            extra: parseFloat(document.getElementById('extra-val').value),
-            shock: document.getElementById('shock_on').checked,
-            targetWait: parseFloat(document.getElementById('target_wait').value),
-            targetLoss: parseFloat(document.getElementById('target_loss').value)
-        };
-
-        // Validate inputs
-        if (params.lam <= 0 || params.mu <= 0 || params.c <= 0) {
-            alert('Please ensure all parameters are positive values.');
-            btn.disabled = false;
-            btn.innerHTML = '<span>Execute Ensemble Simulation</span>';
-            return;
-        }
-
-        const code = `
-import numpy as np
-import matplotlib.pyplot as plt
-import io, base64
-
-def core_sim(lam_in, mu_in, c_in, model_type, extra_val, is_shock):
-    """
-    Core discrete-event simulation engine.
-    Returns: (avg_wait_minutes, loss_percentage, wait_distribution)
-    """
-    t, dur = 0, 24
-    arrs = []
-    
-    # Generate arrivals with optional shock
-    while t < dur:
-        # Apply 5x surge during shock period (hours 10-12)
-        l = lam_in * 5 if (is_shock and 10 <= t <= 12) else lam_in
-        t += np.random.exponential(1/l)
-        if t < dur:
-            # Assign priority class for priority queue model
-            p = 1 if (model_type == "priority" and np.random.random() < (extra_val/100)) else 2
-            arrs.append((t, p))
-    
-    # Sort by priority for priority queue
-    if model_type == "priority":
-        arrs.sort(key=lambda x: (x[0] if x[1]==1 else x[0]+1000))
-    
-    # Initialize server availability times
-    free = [0.0] * int(c_in)
-    waits = []
-    lost = 0
-    
-    # Process each arrival
-    for a_t, p in arrs:
-        free.sort()
-        start = max(a_t, free[0])
-        w = (start - a_t) * 60  # Convert to minutes
-        
-        # Apply model-specific logic
-        if model_type == "circular":
-            # Finite capacity: reject if all K slots occupied
-            occupied = len([s for s in free if s > a_t])
-            if occupied >= extra_val:
-                lost += 1
-                continue
-        
-        if model_type == "deque":
-            # Abandonment: patient leaves if wait exceeds patience
-            if (w/60) > extra_val:
-                lost += 1
-                continue
-        
-        # Assign to earliest available server
-        free[0] = start + np.random.exponential(1/mu_in)
-        waits.append(w)
-    
-    avg_w = np.mean(waits) if waits else 0
-    loss_pct = (lost / len(arrs) * 100) if arrs else 0
-    return avg_w, loss_pct, waits
-
-def run_lab():
-    """
-    Main simulation controller with ensemble analysis and capacity optimization.
-    """
-    n_sims = 60
-    ensemble_waits = []
-    ensemble_loss = []
-    
-    # Run ensemble for current configuration
-    for _ in range(n_sims):
-        w, l, _ = core_sim(${params.lam}, ${params.mu}, ${params.c}, "${currentModel}", ${params.extra}, ${str(params.shock).capitalize()})
-        ensemble_waits.append(w)
-        ensemble_loss.append(l)
-
-    # CAPACITY RECOMMENDER: Find optimal server count
-    rec_c = ${params.c}
-    found = False
-    
-    for test_c in range(1, 21):
-        # Check stability criterion first
-        rho = ${params.lam} / (test_c * ${params.mu})
-        if rho >= 1.0:
-            continue
-        
-        # Run small ensemble to test performance
-        test_ws = []
-        test_ls = []
-        for _ in range(15):
-            w, l, _ = core_sim(${params.lam}, ${params.mu}, test_c, "${currentModel}", ${params.extra}, False)
-            test_ws.append(w)
-            test_ls.append(l)
-        
-        # Check if configuration meets targets
-        if np.mean(test_ws) <= ${params.targetWait} and np.mean(test_ls) <= ${params.targetLoss}:
-            rec_c = test_c
-            found = True
-            break
-
-    # Generate visualization
-    plt.style.use('default')
-    fig, ax = plt.subplots(figsize=(11, 6))
-    fig.patch.set_facecolor('#f8fafb')
-    ax.set_facecolor('#ffffff')
-    
-    # Histogram with styling
-    n, bins, patches = ax.hist(ensemble_waits, bins=25, color='#4c1d95', 
-                                edgecolor='white', alpha=0.85, linewidth=1.5)
-    
-    # Gradient fill for bars
-    for i, patch in enumerate(patches):
-        patch.set_facecolor(plt.cm.viridis(i / len(patches)))
-    
-    # Statistical markers
-    mean_wait = np.mean(ensemble_waits)
-    ax.axvline(mean_wait, color='#10b981', lw=4, label=f'Ensemble Mean: {mean_wait:.1f} min', 
-               linestyle='-', alpha=0.9)
-    ax.axvline(${params.targetWait}, color='#6366f1', ls='--', lw=3, 
-               label=f'Target: ${params.targetWait} min', alpha=0.8)
-    
-    # Styling
-    ax.set_title(f'Wait Time Distribution Across {n_sims} Simulated Realities\\nModel: {currentModel.upper()} | Servers: ${params.c} | ρ = {(${params.lam}/(${params.c}*${params.mu})):.2f}', 
-                 fontsize=14, fontweight='bold', color='#1a0d2e', pad=20)
-    ax.set_xlabel('Average Wait Time (Minutes)', fontsize=12, fontweight='bold', color='#2e1065')
-    ax.set_ylabel('Frequency', fontsize=12, fontweight='bold', color='#2e1065')
-    ax.legend(loc='upper right', fontsize=11, framealpha=0.95, edgecolor='#e2e8f0')
-    ax.grid(True, alpha=0.2, linestyle='--', linewidth=0.5)
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-    
-    plt.tight_layout()
-    
-    # Convert to base64
-    buf = io.BytesIO()
-    plt.savefig(buf, format='png', dpi=150, bbox_inches='tight')
-    plt.close()
-    img = base64.b64encode(buf.getvalue()).decode('utf-8')
-    
-    # Generate text report
-    report = "═══════════════════════════════════════\\n"
-    report += "  ENSEMBLE SIMULATION RESULTS\\n"
-    report += "═══════════════════════════════════════\\n\\n"
-    report += f"Current Configuration:\\n"
-    report += f"  • Servers (c): ${params.c}\\n"
-    report += f"  • Arrival Rate (λ): ${params.lam}/hr\\n"
-    report += f"  • Service Rate (μ): ${params.mu}/hr/server\\n"
-    report += f"  • Utilization (ρ): {(${params.lam}/(${params.c}*${params.mu})):.1%}\\n\\n"
-    
-    report += f"Performance Metrics:\\n"
-    report += f"  • Mean Wait: {mean_wait:.1f} min\\n"
-    report += f"  • Std Dev: {np.std(ensemble_waits):.1f} min\\n"
-    report += f"  • 95th Percentile: {np.percentile(ensemble_waits, 95):.1f} min\\n"
-    report += f"  • Loss Rate: {np.mean(ensemble_loss):.2f}%\\n\\n"
-    
-    shock_text = "YES (5× surge, hours 10-12)" if ${str(params.shock).capitalize()} else "NO"
-    report += f"Shock Simulation: {shock_text}\\n"
-    
-    # Recommendation
-    if found:
-        rec_text = f"✓ RECOMMENDED CAPACITY: {rec_c} Servers\\n\\nThis configuration meets your targets:\\n  • Wait ≤ ${params.targetWait} min\\n  • Loss ≤ ${params.targetLoss}%"
-        savings = ${params.c} - rec_c
-        if savings > 0:
-            rec_text += f"\\n\\nPotential Optimization: -{savings} server(s)"
-        elif savings < 0:
-            rec_text += f"\\n\\n⚠ Current capacity insufficient\\nAdd {abs(savings)} server(s)"
-    else:
-        rec_text = "⚠ CAPACITY RECOMMENDATION UNAVAILABLE\\n\\nDemand exceeds feasible scaling.\\nConsider demand management strategies."
-    
-    return report, img, rec_text
-
-run_lab()
-        `;
-
-        try {
-            const [report, img, rec] = await pyodide.runPythonAsync(code);
-            document.getElementById('text-log').innerText = report;
-            document.getElementById('rec-box').innerText = rec;
-            document.getElementById('plot-img').src = "data:image/png;base64," + img;
-            document.getElementById('output-area').style.display = 'block';
-        } catch (error) {
-            console.error('Simulation error:', error);
-            alert('Simulation error occurred. Please check your parameters and try again.');
-        }
-        
-        btn.disabled = false;
-        btn.innerHTML = '<span>Execute Ensemble Simulation</span>';
-    }
-</script>
+<footer>
+    <p><strong>Chaos Lab</strong> • Operations Science & Capacity Optimization</p>
+    <p>Built with Pyodide, NumPy, Matplotlib • All computation runs in your browser</p>
+    <p>Educational tool for queueing theory and stochastic simulation</p>
+</footer>
 
 </body>
 </html>

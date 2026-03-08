@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M/M/c Standard Queue | Chaos Lab</title>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=IBM+Plex+Mono:wght@400;600&family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav>
+    <div class="container">
+        <a href="index.html" class="logo">Chaos Lab</a>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="mmc.html" class="active">M/M/c Standard</a>
+            <a href="circular.html">Finite Capacity</a>
+            <a href="priority.html">Priority Queue</a>
+            <a href="reneging.html">Reneging</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="page-header">
+        <h1>M/M/c Standard Queue</h1>
+        <p class="subtitle">The Foundation of Multi-Server Queueing Theory</p>
+    </div>
+
+    <section class="theory-section">
+        <h2>Mathematical Foundation</h2>
+        
+        <p>The M/M/c queue represents the canonical multi-server system with <strong>Markovian (memoryless) arrivals</strong> and <strong>Markovian service times</strong>, serving c parallel servers. This model assumes unlimited waiting capacity—patients can queue indefinitely.</p>
+        
+        <h3>The Stability Criterion</h3>
+        <p>System stability requires that total service capacity exceeds arrival rate:</p>
+        
+        <div class="math-box">
+            $$\rho = \frac{\lambda}{c\mu} < 1$$
+        </div>
+        
+        <p>Where <strong>ρ</strong> is the system utilization factor. When ρ ≥ 1, the queue grows without bound.</p>
+        
+        <h3>The Erlang C Formula</h3>
+        <p>The probability that an arriving customer must wait (all servers busy) is given by Erlang's C formula:</p>
+        
+        <div class="math-box">
+            $$C(c, \lambda/\mu) = \frac{\frac{(c\rho)^c}{c!(1-\rho)}}{P_0^{-1}}$$
+        </div>
+        
+        <p>Where P₀ is the probability all servers are idle:</p>
+        
+        <div class="math-box">
+            $$P_0 = \left[\sum_{n=0}^{c-1} \frac{(c\rho)^n}{n!} + \frac{(c\rho)^c}{c!(1-\rho)}\right]^{-1}$$
+        </div>
+        
+        <h3>Average Wait Time</h3>
+        <p>For those who must wait, the average queue time is:</p>
+        
+        <div class="math-box">
+            $$W_q = \frac{C(c, \lambda/\mu)}{c\mu - \lambda}$$
+        </div>
+    </section>
+
+    <section class="example-section">
+        <h2>Real-World Example: Emergency Department Physician Staffing</h2>
+        
+        <div class="example-card">
+            <h3>Scenario: Metro General Hospital ED</h3>
+            
+            <p><strong>Operational Context:</strong></p>
+            <ul>
+                <li>Average arrival rate: <strong>12 patients/hour</strong> (λ = 12)</li>
+                <li>Average service time per physician: <strong>15 minutes</strong> (μ = 4 patients/hour/physician)</li>
+                <li>Current staffing: <strong>3 physicians</strong> (c = 3)</li>
+                <li>Target: Wait time < 20 minutes for 90% of patients</li>
+            </ul>
+            
+            <p><strong>Analysis:</strong></p>
+            <p>Current utilization: ρ = 12/(3×4) = 1.0 → <span class="warning">UNSTABLE!</span></p>
+            <p>The system is at the critical threshold. Small fluctuations will create unbounded queues.</p>
+            
+            <p><strong>Simulation Question:</strong> How many physicians are needed to achieve the 20-minute target?</p>
+            
+            <div class="hint-box">
+                💡 <strong>Try this:</strong> Input λ=12, μ=4, test c=3,4,5 and compare. Set target wait to 20 minutes. Enable shock simulation to test surge resilience.
+            </div>
+        </div>
+    </section>
+
+    <section class="lab-section">
+        <h2>Interactive Simulation Laboratory</h2>
+        
+        <div class="lab-ui">
+            <div class="control-grid">
+                <div class="control-group">
+                    <label>Arrivals (λ/hr)</label>
+                    <input type="number" id="lam" value="12" step="0.5" min="0">
+                </div>
+                <div class="control-group">
+                    <label>Service (μ/hr/Server)</label>
+                    <input type="number" id="mu" value="4" step="0.25" min="0.1">
+                </div>
+                <div class="control-group">
+                    <label>Current Servers (c)</label>
+                    <input type="number" id="servers" value="4" step="1" min="1">
+                </div>
+            </div>
+
+            <div class="recommendation-target">
+                <strong>Capacity Optimizer Targets</strong>
+                <div class="control-grid" style="margin-top:15px;">
+                    <div class="control-group">
+                        <label>Target Max Wait (min)</label>
+                        <input type="number" id="target_wait" value="20" step="5" min="5">
+                    </div>
+                    <div class="control-group">
+                        <label>Acceptable Loss (%)</label>
+                        <input type="number" id="target_loss" value="0" step="1" min="0" max="100">
+                    </div>
+                </div>
+            </div>
+
+            <div class="shock-bar">
+                <input type="checkbox" id="shock_on">
+                <label for="shock_on">🚨 SIMULATE SYSTEM SHOCK (5× Arrivals for 2 Hours at Hour 10)</label>
+            </div>
+
+            <button id="runBtn" onclick="runSimulation()" disabled>
+                <span>Initializing Python Computation Engine...</span>
+            </button>
+
+            <div id="output-area" style="display:none;">
+                <div class="res-grid">
+                    <div>
+                        <div id="text-log"></div>
+                        <div id="rec-box"></div>
+                    </div>
+                    <div class="img-wrap">
+                        <img id="plot-img" src="" alt="Simulation Results" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="interpretation-section">
+        <h2>Interpreting Your Results</h2>
+        
+        <h3>Key Metrics Explained</h3>
+        
+        <div class="metric-card">
+            <h4>Utilization (ρ)</h4>
+            <p><strong>< 70%:</strong> <span class="good">Low stress, highly responsive</span></p>
+            <p><strong>70-85%:</strong> <span class="ok">Efficient, manageable volatility</span></p>
+            <p><strong>85-95%:</strong> <span class="warning">High volatility, vulnerable to shocks</span></p>
+            <p><strong>≥ 95%:</strong> <span class="danger">Extreme wait times, system fragility</span></p>
+        </div>
+        
+        <div class="metric-card">
+            <h4>Ensemble Distribution Width</h4>
+            <p><strong>Narrow spread:</strong> Predictable performance across scenarios</p>
+            <p><strong>Wide spread:</strong> High operational volatility—some realities perform well, others catastrophically</p>
+            <p>The 95th percentile reveals your "worst case" planning scenario.</p>
+        </div>
+        
+        <div class="metric-card">
+            <h4>The "Elbow" Point</h4>
+            <p>Adding servers reduces wait times with diminishing returns. The elbow is where marginal benefit drops sharply.</p>
+            <p><strong>Before elbow:</strong> Each server dramatically improves performance</p>
+            <p><strong>After elbow:</strong> Minimal improvement per additional server</p>
+        </div>
+    </section>
+</div>
+
+<footer>
+    <p><strong>Chaos Lab</strong> • M/M/c Standard Queue Model</p>
+    <p>All computation runs in your browser using Pyodide</p>
+</footer>
+
+<script src="simulation.js"></script>
+<script>
+    async function init() {
+        pyodide = await loadPyodide();
+        await pyodide.loadPackage(["numpy", "matplotlib"]);
+        document.getElementById('runBtn').disabled = false;
+        document.getElementById('runBtn').innerHTML = '<span>Execute Ensemble Simulation</span>';
+    }
+    init();
+
+    async function runSimulation() {
+        const btn = document.getElementById('runBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span>Processing 60 Realities</span><span class="loading-spinner"></span>';
+        
+        const params = {
+            lam: parseFloat(document.getElementById('lam').value),
+            mu: parseFloat(document.getElementById('mu').value),
+            c: parseInt(document.getElementById('servers').value),
+            shock: document.getElementById('shock_on').checked,
+            targetWait: parseFloat(document.getElementById('target_wait').value),
+            targetLoss: parseFloat(document.getElementById('target_loss').value)
+        };
+
+        if (params.lam <= 0 || params.mu <= 0 || params.c <= 0) {
+            alert('Please ensure all parameters are positive values.');
+            btn.disabled = false;
+            btn.innerHTML = '<span>Execute Ensemble Simulation</span>';
+            return;
+        }
+
+        const rho = params.lam / (params.c * params.mu);
+        if (rho >= 1.0) {
+            const recommend = Math.ceil(params.lam / params.mu);
+            alert(`⚠ UNSTABLE SYSTEM: ρ = ${rho.toFixed(2)} ≥ 1.0\n\nMinimum servers: ${recommend}\nCurrent: ${params.c}`);
+            btn.disabled = false;
+            btn.innerHTML = '<span>Execute Ensemble Simulation</span>';
+            return;
+        }
+
+        await runMMC(params);
+        
+        btn.disabled = false;
+        btn.innerHTML = '<span>Execute Ensemble Simulation</span>';
+    }
+
+    async function runMMC(params) {
+        const code = `
+import numpy as np
+import matplotlib.pyplot as plt
+import io, base64
+
+def simulate_mmc(lam, mu, c, is_shock):
+    t, dur = 0, 24
+    arrs = []
+    while t < dur:
+        l = lam * 5 if (is_shock and 10 <= t <= 12) else lam
+        t += np.random.exponential(1/l)
+        if t < dur:
+            arrs.append(t)
+    
+    free = [0.0] * c
+    waits = []
+    
+    for a_t in arrs:
+        free.sort()
+        start = max(a_t, free[0])
+        w = (start - a_t) * 60
+        free[0] = start + np.random.exponential(1/mu)
+        waits.append(w)
+    
+    return np.mean(waits) if waits else 0, 0, waits
+
+n_sims = 60
+ensemble_waits = []
+
+for _ in range(n_sims):
+    w, _, _ = simulate_mmc(${params.lam}, ${params.mu}, ${params.c}, ${params.shock})
+    ensemble_waits.append(w)
+
+rec_c = ${params.c}
+found = False
+
+for test_c in range(1, 21):
+    rho = ${params.lam} / (test_c * ${params.mu})
+    if rho >= 1.0: continue
+    
+    test_ws = []
+    for _ in range(15):
+        w, _, _ = simulate_mmc(${params.lam}, ${params.mu}, test_c, False)
+        test_ws.append(w)
+    
+    if np.mean(test_ws) <= ${params.targetWait}:
+        rec_c = test_c
+        found = True
+        break
+
+plt.style.use('default')
+fig, ax = plt.subplots(figsize=(11, 6))
+fig.patch.set_facecolor('#f8fafb')
+ax.set_facecolor('#ffffff')
+
+mean_wait = np.mean(ensemble_waits)
+n, bins, patches = ax.hist(ensemble_waits, bins=min(30, max(15, len(ensemble_waits)//3)), 
+                            color='#4c1d95', edgecolor='white', alpha=0.85, linewidth=1.5)
+
+if len(patches) > 0:
+    for i, patch in enumerate(patches):
+        patch.set_facecolor(plt.cm.viridis(i / len(patches)))
+
+ax.axvline(mean_wait, color='#84cc16', lw=4, label=f'Mean: {mean_wait:.1f} min', linestyle='-', alpha=0.9)
+ax.axvline(${params.targetWait}, color='#6366f1', ls='--', lw=3, label=f'Target: ${params.targetWait} min', alpha=0.8)
+
+ax.set_title(f'M/M/c Queue: Wait Time Distribution (n={n_sims})\\nServers: ${params.c} | ρ = {(${params.lam}/(${params.c}*${params.mu})):.2f}', 
+             fontsize=14, fontweight='bold', color='#1a0d2e', pad=20)
+ax.set_xlabel('Average Wait Time (Minutes)', fontsize=12, fontweight='bold', color='#2e1065')
+ax.set_ylabel('Frequency', fontsize=12, fontweight='bold', color='#2e1065')
+ax.legend(loc='upper right', fontsize=11)
+ax.grid(True, alpha=0.2)
+
+plt.tight_layout()
+buf = io.BytesIO()
+plt.savefig(buf, format='png', dpi=150, bbox_inches='tight')
+plt.close()
+img = base64.b64encode(buf.getvalue()).decode('utf-8')
+
+report = "═══════════════════════════════════════\\n"
+report += "  M/M/c SIMULATION RESULTS\\n"
+report += "═══════════════════════════════════════\\n\\n"
+report += f"Configuration:\\n"
+report += f"  • Servers: ${params.c}\\n"
+report += f"  • Arrival Rate: ${params.lam}/hr\\n"
+report += f"  • Service Rate: ${params.mu}/hr\\n"
+report += f"  • Utilization: {(${params.lam}/(${params.c}*${params.mu})):.1%}\\n\\n"
+report += f"Performance (n={n_sims}):\\n"
+report += f"  • Mean Wait: {mean_wait:.1f} min\\n"
+report += f"  • Std Dev: {np.std(ensemble_waits):.1f} min\\n"
+report += f"  • Median: {np.median(ensemble_waits):.1f} min\\n"
+report += f"  • 95th %ile: {np.percentile(ensemble_waits, 95):.1f} min\\n"
+
+shock_text = "YES (5× surge)" if ${params.shock} else "NO"
+report += f"\\nShock: {shock_text}\\n"
+
+if found:
+    rec_text = f"✓ RECOMMENDED: {rec_c} Servers\\n\\nMeets target ≤ ${params.targetWait} min"
+    savings = ${params.c} - rec_c
+    if savings > 0:
+        rec_text += f"\\n\\nOptimization: -{savings} server(s)"
+    elif savings < 0:
+        rec_text += f"\\n\\n⚠ Add {abs(savings)} server(s)"
+else:
+    rec_text = "⚠ Target unreachable\\nConsider demand management"
+
+(report, img, rec_text)
+        `;
+
+        const [report, img, rec] = await pyodide.runPythonAsync(code);
+        document.getElementById('text-log').innerText = report;
+        document.getElementById('rec-box').innerText = rec;
+        document.getElementById('plot-img').src = "data:image/png;base64," + img;
+        document.getElementById('output-area').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
