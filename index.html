@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Chaos Lab: Non-Stationary Queueing</title>
+    <title>Chaos Lab: Operations Science & Capacity Optimization</title>
     <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
@@ -12,124 +12,145 @@
             --accent: #dc143c;  /* Crimson */
             --bg: #fffafa;
             --card-bg: #ffffff;
+            --text: #2d3436;
         }
 
-        body { font-family: 'Inter', system-ui, sans-serif; background-color: var(--bg); color: #333; line-height: 1.7; max-width: 1200px; margin: auto; padding: 20px; }
+        body { font-family: 'Inter', -apple-system, sans-serif; background-color: var(--bg); color: var(--text); line-height: 1.8; max-width: 1200px; margin: auto; padding: 20px; }
         
         header { 
-            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, #4b0082 50%, var(--accent) 100%);
             color: white; padding: 4rem 2rem; text-align: center; border-radius: 15px; margin-bottom: 40px; box-shadow: 0 10px 30px rgba(46, 8, 84, 0.3);
         }
 
-        .theory-section { background: var(--card-bg); padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 30px; border-top: 5px solid var(--accent); }
-        .math-block { background: #f8f1f1; padding: 20px; border-radius: 8px; margin: 20px 0; overflow-x: auto; border-left: 4px solid var(--primary); font-size: 1.1rem; }
+        .section-card { background: var(--card-bg); padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 40px; border-left: 8px solid var(--primary); }
+        h2 { color: var(--primary); font-size: 2.1rem; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; margin-top: 0; }
+        h3 { color: var(--accent); font-size: 1.4rem; margin-top: 25px; font-weight: 800; }
 
-        .simulation-container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+        .math-box { background: #fdf2f4; padding: 25px; border-radius: 10px; margin: 20px 0; border: 1px solid #eee; overflow-x: auto; font-family: "Times New Roman", serif; font-size: 1.1rem; }
         
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 10px; }
-        .tab-btn { 
-            padding: 12px 24px; border: none; border-radius: 30px; cursor: pointer; font-weight: bold;
-            background: #eee; color: #666; transition: 0.3s; white-space: nowrap;
-        }
+        /* Interactive Lab UI */
+        .lab-ui { background: #f8f9fa; padding: 30px; border-radius: 15px; border: 2px solid #eee; margin-bottom: 50px; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 25px; overflow-x: auto; padding-bottom: 5px; }
+        .tab-btn { padding: 12px 25px; border: none; border-radius: 30px; cursor: pointer; font-weight: bold; background: #ddd; transition: 0.3s; white-space: nowrap; }
         .tab-btn.active { background: var(--primary); color: white; }
-
-        .control-panel { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; background: #fdfdfd; padding: 25px; border-radius: 10px; border: 1px solid #eee; margin-bottom: 20px; }
-        .control-group label { display: block; font-weight: 700; margin-bottom: 8px; color: var(--primary); }
-        .control-group input { width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 6px; }
-
-        .shock-toggle { display: flex; align-items: center; gap: 10px; padding: 15px; background: #fff5f5; border-radius: 8px; border: 1px solid var(--accent); margin-bottom: 20px; }
-        .shock-toggle input { transform: scale(1.5); cursor: pointer; }
-        .shock-toggle label { font-weight: bold; color: var(--accent); cursor: pointer; }
-
-        button#runBtn { 
-            width: 100%; background: var(--accent); color: white; border: none; padding: 18px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.2s;
-        }
-        button#runBtn:hover { filter: brightness(1.2); }
-        button#runBtn:disabled { background: #ccc; cursor: not-allowed; }
-
-        #output-area { margin-top: 30px; display: none; }
-        .results-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        @media (max-width: 900px) { .results-grid { grid-template-columns: 1fr; } }
         
-        #text-results { background: #2d3436; color: #fff; padding: 20px; border-radius: 8px; font-family: 'Courier New', monospace; font-size: 0.9rem; }
-        .plot-container img { width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .control-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px; }
+        .control-group label { display: block; font-weight: 700; margin-bottom: 8px; color: var(--primary); font-size: 0.9rem; }
+        .control-group input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; box-sizing: border-box; }
+
+        .shock-bar { background: #fff5f5; padding: 20px; border-radius: 10px; border: 2px dashed var(--accent); margin-bottom: 25px; display: flex; align-items: center; gap: 15px; font-weight: bold; color: var(--accent); }
+        .shock-bar input { transform: scale(1.5); }
+
+        .recommendation-target { background: #eef2ff; padding: 20px; border-radius: 10px; border-left: 5px solid #4f46e5; margin-bottom: 25px; }
+
+        button#runBtn { width: 100%; padding: 22px; background: linear-gradient(to right, var(--primary), var(--accent)); color: white; border: none; border-radius: 10px; font-size: 1.3rem; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 5px 15px rgba(220, 20, 60, 0.3); }
+        button#runBtn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+        button#runBtn:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; }
+
+        #output-area { display: none; margin-top: 40px; }
+        .res-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 30px; }
+        #text-log { background: #2d3436; color: #fff; padding: 25px; border-radius: 10px; font-family: 'Courier New', monospace; font-size: 0.95rem; line-height: 1.5; }
+        #rec-box { background: #fff; color: var(--primary); border: 3px solid var(--accent); padding: 20px; border-radius: 10px; margin-top: 20px; font-weight: bold; text-align: center; font-size: 1.2rem; }
+        .img-wrap img { width: 100%; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
+        
+        @media (max-width: 900px) { .res-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
 <header>
     <h1>The Calculus of Chaos</h1>
-    <p>Non-Stationary Shocks in Operations & Healthcare</p>
+    <p>Capacity Optimization & Stochastic Simulation for High-Stakes Systems</p>
 </header>
 
-<section class="theory-section">
-    <h2>1. The Theory of the "Shock"</h2>
-    <p>In classical queueing, we assume the system is in <strong>Steady State</strong> ($ \rho < 1 $). However, real-world operations are often hit by <strong>Non-Stationary Shocks</strong>—sudden spikes where $ \lambda(t) \gg c\mu $.</p>
+<section class="section-card">
+    <h2>1. The General Service Problem</h2>
+    <p>The <strong>General Service Problem</strong> states that total system cost is the sum of <em>Capacity Costs</em> (staffing) and <em>Waiting Costs</em> (patient suffering/lost revenue). Because arrival patterns follow a **Poisson Process**, they exhibit "clumping."</p>
     
-    <div class="math-block">
-        $$\text{Accumulated Queue During Shock: } Q(t) = \int_{t_{start}}^{t} (\lambda(s) - c\mu) ds$$
+    <p>Variability causes queues to form even when average capacity exceeds average demand. We define the **Stability Criterion** as:</p>
+    <div class="math-box">
+        $$\rho = \frac{\lambda}{c \mu} < 1$$
     </div>
-
-    <p>When the shock ends, the system doesn't immediately return to normal. It must clear the "backlog." The **Recovery Time ($T_r$)** is the most critical metric for disaster planning:</p>
-    
-    <div class="math-block">
-        $$T_r = \frac{Q(t_{end})}{c\mu - \lambda_{base}}$$
-    </div>
-    <p>If your base utilization is already high, $ c\mu - \lambda_{base} $ is small, meaning a 1-hour shock could take 10 hours to recover from.</p>
+    <p>If $\rho \geq 1$, the system is non-stationary; the queue will grow indefinitely over time. Our lab helps you find the "Elbow" where adding one more server provides the maximum reduction in volatility.</p>
 </section>
 
+<section class="section-card">
+    <h2>2. Mathematical Models & Recurrence</h2>
 
+    <h3>A. The M/M/c Derivation</h3>
+    <p>The probability $P_0$ that all servers are idle is the foundation of the model:</p>
+    <div class="math-box">
+        $$P_0 = \left[ \sum_{n=0}^{c-1} \frac{(c\rho)^n}{n!} + \frac{(c\rho)^c}{c!(1-\rho)} \right]^{-1}$$
+    </div>
 
-<section class="simulation-container">
-    <h2>2. Advanced Multi-Model Laboratory</h2>
-    <div class="tabs" id="modelTabs">
-        <button class="tab-btn active" onclick="setModel('mmc')">M/M/c (Standard)</button>
-        <button class="tab-btn" onclick="setModel('circular')">Circular (Bed Limit)</button>
+    <h3>B. Circular (M/M/c/K) Finite Buffer</h3>
+    <p>When capacity is limited to $K$ slots, the <strong>Blocking Probability</strong> ($P_B$) describes the frequency with which patients are diverted.
+    </p>
+    <div class="math-box">
+        $$P_B = P_K = P_0 \frac{(c\rho)^K}{c! c^{K-c}}$$
+    </div>
+
+    <h3>C. Priority Triage Logic</h3>
+    <p>Priority systems reduce wait times for Class 1 by shifting the "Variance Burden" to Class 2.
+    </p>
+    <div class="math-box">
+        $$W_{class2} = \frac{E[S^2]\lambda}{2(1-\rho_1)(1-\rho_1-\rho_2)}$$
+    </div>
+
+    <h3>D. Deque (Reneging)</h3>
+    <p>This models **Customer Churn**. A patient exits the queue (reneges) if their wait time $W$ exceeds their patience threshold $T$.
+    </p>
+</section>
+
+<section class="section-card">
+    <h2>3. The Shock Theory</h2>
+    <p>A <strong>System Shock</strong> is a transient period where $\lambda(t) \gg c\mu$. In these states, the "Average Wait" is a meaningless metric. We must instead calculate the <strong>Recovery Time</strong> required to clear the deterministic backlog:
+    </p>
+    <div class="math-box">
+        $$T_{recovery} = \frac{Q_{backlog}}{c\mu - \lambda_{baseline}}$$
+    </div>
+</section>
+
+<div class="lab-ui">
+    <div class="tabs">
+        <button class="tab-btn active" onclick="setModel('mmc')">M/M/c Standard</button>
+        <button class="tab-btn" onclick="setModel('circular')">Circular (Beds)</button>
         <button class="tab-btn" onclick="setModel('priority')">Priority (Triage)</button>
         <button class="tab-btn" onclick="setModel('deque')">Deque (Reneging)</button>
     </div>
 
-    <div class="control-panel">
-        <div class="control-group"><label>Base $\lambda$ (Arr/hr)</label><input type="number" id="lam" value="8"></div>
-        <div class="control-group"><label>Service $\mu$ (Arr/hr/Dr)</label><input type="number" id="mu" value="4"></div>
-        <div class="control-group"><label>Doctors ($c$)</label><input type="number" id="servers" value="3"></div>
-        <div class="control-group"><label id="extra-label">Sim Duration (Hrs)</label><input type="number" id="extra-param" value="24"></div>
+    <div class="control-grid">
+        <div class="control-group"><label>Arrivals ($\lambda$/hr)</label><input type="number" id="lam" value="10"></div>
+        <div class="control-group"><label>Service ($\mu$/hr/Dr)</label><input type="number" id="mu" value="4"></div>
+        <div class="control-group"><label>Current Servers ($c$)</label><input type="number" id="servers" value="3"></div>
+        <div class="control-group"><label id="extra-label">Sim Iterations</label><input type="number" id="extra-val" value="50"></div>
     </div>
 
-    <div class="shock-toggle">
-        <input type="checkbox" id="shock_active">
-        <label for="shock_active">⚠️ TRIGGER SYSTEM SHOCK (5x Arrival rate for 2 hours at Hour 10)</label>
-    </div>
-
-    <button id="runBtn" onclick="runSim()" disabled>Initializing Python Engine...</button>
-
-    <div id="output-area">
-        <div class="results-grid">
-            <div id="text-results"></div>
-            <div class="plot-container"><img id="plot-img" src="" /></div>
+    <div class="recommendation-target">
+        <strong>Capacity Optimizer Targets:</strong>
+        <div class="control-grid" style="margin-top:10px; background:none; border:none; padding:0;">
+            <div class="control-group"><label>Target Max Wait (mins)</label><input type="number" id="target_wait" value="20"></div>
+            <div class="control-group"><label>Acceptable Loss (%)</label><input type="number" id="target_loss" value="5"></div>
         </div>
     </div>
-</section>
 
-<section class="theory-section">
-    <h2>3. Structural Architecture</h2>
-    
-    <h3>A. M/M/c & The Pooling Effect</h3>
-    <p>Efficiency increases when servers are pooled. The probability of all servers being busy ($C(c, a)$) is given by the Erlang-C formula.</p>
-    
+    <div class="shock-bar">
+        <input type="checkbox" id="shock_on">
+        <label for="shock_on">🚨 SIMULATE SYSTEM SHOCK (5x Arrivals for 2 Hours at Hour 10)</label>
+    </div>
 
-    <h3>B. Circular (Finite Capacity)</h3>
-    <p>In a **Circular Queue** with capacity $K$, the system enters a "Blocked" state when $n=K$. Any arrival during this time is lost (Hospital Diversion).</p>
-    
+    <button id="runBtn" onclick="runEnsemble()" disabled>Initializing Python Lab...</button>
 
-    <h3>C. Priority (Triage Logic)</h3>
-    <p>High-priority patients "cut" the line. This protects critical outcomes but creates **Variance Shocks** for low-priority arrivals, whose wait time distribution becomes "fat-tailed."</p>
-    
-
-    <h3>D. Deque (The Reneging Exit)</h3>
-    <p>A **Double-Ended Queue** allows exits from the back. In healthcare, this models "Left Without Being Seen" (LWBS). Patients have a patience threshold; if $Wait > Tolerance$, they depart without service.</p>
-    
-</section>
+    <div id="output-area">
+        <div class="res-grid">
+            <div>
+                <div id="text-log"></div>
+                <div id="rec-box"></div>
+            </div>
+            <div class="img-wrap"><img id="plot-img" src="" /></div>
+        </div>
+    </div>
+</div>
 
 <script>
     let pyodide;
@@ -139,7 +160,7 @@
         pyodide = await loadPyodide();
         await pyodide.loadPackage(["numpy", "matplotlib"]);
         document.getElementById('runBtn').disabled = false;
-        document.getElementById('runBtn').innerText = "Run Simulation";
+        document.getElementById('runBtn').innerText = "Execute Ensemble Simulation";
     }
     init();
 
@@ -147,116 +168,128 @@
         currentModel = m;
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         event.target.classList.add('active');
-        const extraLabel = document.getElementById('extra-label');
-        if (m === 'circular') extraLabel.innerText = "Max Capacity (K)";
-        else if (m === 'priority') extraLabel.innerText = "% High Priority";
-        else if (m === 'deque') extraLabel.innerText = "Max Wait (Reneging Hr)";
-        else extraLabel.innerText = "Sim Duration (Hrs)";
+        const l = document.getElementById('extra-label');
+        if (m === 'circular') l.innerText = "Max Capacity (K)";
+        else if (m === 'priority') l.innerText = "% High Prio";
+        else if (m === 'deque') l.innerText = "Max Patience (Hr)";
+        else l.innerText = "Sim Iterations";
     }
 
-    async function runSim() {
-        const runBtn = document.getElementById('runBtn');
-        runBtn.disabled = true;
+    async function runEnsemble() {
+        const btn = document.getElementById('runBtn');
+        btn.disabled = true; btn.innerText = "Processing 100+ Realities...";
+        
         const params = {
             lam: parseFloat(document.getElementById('lam').value),
             mu: parseFloat(document.getElementById('mu').value),
             c: parseInt(document.getElementById('servers').value),
-            extra: parseFloat(document.getElementById('extra-param').value),
-            shock: document.getElementById('shock_active').checked
+            extra: parseFloat(document.getElementById('extra-val').value),
+            shock: document.getElementById('shock_on').checked,
+            targetWait: parseFloat(document.getElementById('target_wait').value),
+            targetLoss: parseFloat(document.getElementById('target_loss').value)
         };
 
-        const pythonCode = `
+        const code = `
 import numpy as np
 import matplotlib.pyplot as plt
 import io, base64
 
-def run():
-    duration = 36
-    lam_base = ${params.lam}
-    mu = ${params.mu}
-    c = ${params.c}
-    extra = ${params.extra}
-    model = "${currentModel}"
+def core_sim(lam_in, mu_in, c_in, model_type, extra_val, is_shock):
+    t, dur = 0, 24
+    arrs = []
+    while t < dur:
+        l = lam_in * 5 if (is_shock and 10 <= t <= 12) else lam_in
+        t += np.random.exponential(1/l)
+        if t < dur:
+            p = 1 if (model_type == "priority" and np.random.random() < (extra_val/100)) else 2
+            arrs.append((t, p))
     
-    t = 0
-    arrivals = []
-    # Non-Stationary Poisson Process
-    while t < duration:
-        current_lam = lam_base
-        if ${str(params.shock).capitalize()} and 10 <= t <= 12:
-            current_lam = lam_base * 5
+    if model_type == "priority":
+        arrs.sort(key=lambda x: (x[0] if x[1]==1 else x[0]+100))
         
-        t += np.random.exponential(1/current_lam)
-        if t < duration:
-            priority = 2
-            if model == 'priority' and np.random.random() < (extra/100):
-                priority = 1
-            arrivals.append((t, priority))
-            
-    server_free_at = [0.0] * c
+    free = [0.0] * int(c_in)
     waits = []
-    queue_over_time = []
-    time_points = np.linspace(0, duration, 200)
-    
-    # Sort for Priority
-    if model == 'priority':
-        arrivals.sort(key=lambda x: (x[0] if x[1]==1 else x[0]+100))
-
-    dropped = 0
-    processed_arrivals = []
-
-    for a_time, prio in arrivals:
-        server_free_at.sort()
-        start_time = max(a_time, server_free_at[0])
-        wait = start_time - a_time
+    lost = 0
+    for a_t, p in arrs:
+        free.sort()
+        start = max(a_t, free[0])
+        w = (start - a_t) * 60
         
-        if model == 'circular' and len([s for s in server_free_at if s > a_time]) >= extra:
-            dropped += 1
-            continue
-        if model == 'deque' and wait > extra:
-            dropped += 1
-            continue
+        if model_type == "circular" and len([s for s in free if s > a_t]) >= extra_val:
+            lost += 1; continue
+        if model_type == "deque" and (w/60) > extra_val:
+            lost += 1; continue
             
-        duration_srv = np.random.exponential(1/mu)
-        server_free_at[0] = start_time + duration_srv
-        waits.append(wait * 60)
-        processed_arrivals.append(a_time)
+        free[0] = start + np.random.exponential(1/mu_in)
+        waits.append(w)
+    
+    avg_w = np.mean(waits) if waits else 0
+    loss_pct = (lost / len(arrs) * 100) if arrs else 0
+    return avg_w, loss_pct, waits
 
-    # Calculate queue length over time for plot
-    for tp in time_points:
-        active = len([a for a in processed_arrivals if a <= tp])
-        finished = len([s for s in server_free_at if s <= tp and s > 0]) # rough estimate
-        queue_over_time.append(max(0, active - (finished + c)))
+def run_lab():
+    n_sims = 60
+    ensemble_waits = []
+    ensemble_loss = []
+    
+    # Run Ensemble for current settings
+    for _ in range(n_sims):
+        w, l, _ = core_sim(${params.lam}, ${params.mu}, ${params.c}, "${currentModel}", ${params.extra}, ${str(params.shock).capitalize()})
+        ensemble_waits.append(w)
+        ensemble_loss.append(l)
+
+    # CAPACITY RECOMMENDER LOGIC
+    rec_c = ${params.c}
+    found = False
+    for test_c in range(1, 20):
+        # Check stability first
+        if ${params.lam} / (test_c * ${params.mu}) >= 1.0: continue
+        
+        # Test performance
+        test_ws = []
+        test_ls = []
+        for _ in range(15): # Small sample for speed
+            w, l, _ = core_sim(${params.lam}, ${params.mu}, test_c, "${currentModel}", ${params.extra}, False) # Baseline rec
+            test_ws.append(w)
+            test_ls.append(l)
+        
+        if np.mean(test_ws) <= ${params.targetWait} and np.mean(test_ls) <= ${params.targetLoss}:
+            rec_c = test_c
+            found = True
+            break
 
     plt.figure(figsize=(10, 5))
-    plt.plot(time_points, queue_over_time, color='#dc143c', lw=3)
-    plt.fill_between(time_points, queue_over_time, color='#2e0854', alpha=0.2)
-    plt.title(f"System Response: {model.upper()} | Shock Active: ${params.shock}")
-    plt.xlabel("Time (Hours)")
-    plt.ylabel("Patients in Queue")
-    plt.grid(True, alpha=0.2)
+    plt.hist(ensemble_waits, bins=20, color='#2e0854', edgecolor='white', alpha=0.8)
+    plt.axvline(np.mean(ensemble_waits), color='#dc143c', lw=4, label="Ensemble Mean")
+    plt.axvline(${params.targetWait}, color='#4f46e5', ls='--', lw=2, label="Target")
+    plt.title(f"Wait Time Volatility (n={n_sims} Realities)")
+    plt.xlabel("Average Wait (Minutes)")
+    plt.legend()
     
-    buf = io.BytesIO()
-    plt.savefig(buf, format='png')
+    buf = io.BytesIO(); plt.savefig(buf, format='png'); plt.close()
     img = base64.b64encode(buf.getvalue()).decode('utf-8')
     
-    report = f"Simulation Results\\n------------------\\n"
-    report += f"Total Arrivals: {len(arrivals)}\\n"
-    report += f"Avg Wait: {np.mean(waits) if waits else 0:.2f} min\\n"
-    report += f"Max Queue: {max(queue_over_time):.0f} patients\\n"
-    if dropped > 0: report += f"System Loss (Dropped): {dropped}"
+    report = f"LAB RESULTS\\n----------------\\n"
+    report += f"Current Avg Wait: {np.mean(ensemble_waits):.1f} min\\n"
+    report += f"System Loss Rate: {np.mean(ensemble_loss):.1f}%\\n"
+    report += f"Utilization (ρ): {(${params.lam}/(${params.c}*${params.mu})):.1%}\\n"
     
-    return report, img
+    rec_text = f"RECOMMENDED CAPACITY: {rec_c} Servers"
+    if not found: rec_text = "RECOMMENDATION: Scale exceeds simulation bounds (>20)."
+    
+    return report, img, rec_text
 
-run()
+run_lab()
         `;
 
-        const [report, img] = await pyodide.runPythonAsync(pythonCode);
-        document.getElementById('text-results').innerText = report;
+        const [report, img, rec] = await pyodide.runPythonAsync(code);
+        document.getElementById('text-log').innerText = report;
+        document.getElementById('rec-box').innerText = rec;
         document.getElementById('plot-img').src = "data:image/png;base64," + img;
         document.getElementById('output-area').style.display = 'block';
-        runBtn.disabled = false;
+        btn.disabled = false; btn.innerText = "Execute Ensemble Simulation";
     }
 </script>
+
 </body>
 </html>
